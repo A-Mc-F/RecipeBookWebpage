@@ -1,0 +1,35 @@
+recipe-book-app/
+│
+├── public/
+│   ├── index.html
+│   ├── add-recipe.html
+│   ├── view-recipes.html
+│   ├── import-recipe.html
+│   └── script.js
+│
+├── server/
+│   ├── server.js
+│   └── db.js
+│
+├── package.json
+└── README.md
+```
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Recipe</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Import Recipe</h1>
+    <form id="import-form">
+        <label for="recipe-url">Recipe URL:</label>
+        <input type="url" id="recipe-url" name="recipe-url">
+        <button type="button" onclick="importRecipe()">Import</button>
+    </form>
+    <script src="recipeImport.js"></script>
+</body>
+</html>
