@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, query, limit } from "firebase/firestore";
+import { getFirestore, collection, getDocs, query, limit, getDoc, doc } from "firebase/firestore";
+import { RecipeObject, recipeConverter } from './recipeObject.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyB7fE3GsZIxyfE7twzsUnycLCk4tx0xzU4",
@@ -64,11 +65,40 @@ window.randomRecipe = async function() {
     }
 }
 
-window.confirmMealPlan = function() {
+window.confirmMealPlan = async function() {
     const mealPlan = document.getElementById('meal-plan');
     const recipeItems = Array.from(mealPlan.children);
     const recipeIds = recipeItems.map(item => item.querySelector('.hidden-id').innerText);
-    console.log(recipeIds);
+
+    const ingredients = [];
+    for (const id of recipeIds) {
+        const docRef = doc(db, 'recipes', id).withConverter(recipeConverter);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const recipe = docSnap.data();
+            if (recipe.ingredients) {
+                recipe.ingredients.forEach(ingredient => {
+                    ingredients.push(`${ingredient} - ${recipe.name}`);
+                });
+            }
+        }
+    }
+
+    const shoppingListPage = document.createElement('div');
+    shoppingListPage.id = 'shopping-list-page';
+    shoppingListPage.innerHTML = `
+        <h1>Shopping List</h1>
+        <ul id="shopping-list">
+            ${ingredients.map((ingredient) => `<li>${ingredient}</li>`).join('')}
+        </ul>
+        <button onclick="goBackToMealPlanner()">Back to Meal Planner</button>
+    `;
+    document.body.innerHTML = '';
+    document.body.appendChild(shoppingListPage);
+}
+
+window.goBackToMealPlanner = function() {
+    location.reload();
 }
 
 document.addEventListener('DOMContentLoaded', fetchRecipes);
