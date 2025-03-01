@@ -102,7 +102,7 @@ window.modifyRecipe = async function (recipeId) {
 };
 
 window.deleteRecipe = async function(recipeId) {
-    if (confirm("Are you sure you want to delete this recipe?")) {
+    if (confirm(`Are you sure you want to delete ${recipeId}?`)) {
         await deleteDoc(doc(db, "recipes", recipeId));
         loadRecipeBook();
     }
@@ -111,10 +111,19 @@ window.deleteRecipe = async function(recipeId) {
 window.addIngredient = function() {
     const ingredientsList = document.getElementById('ingredients-list');
     if (ingredientsList) {
+        const ingredientDiv = document.createElement('div');
         const input = document.createElement('input');
         input.type = 'text';
         input.name = 'ingredients';
-        ingredientsList.appendChild(input);
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.textContent = 'Remove';
+        removeButton.onclick = function() {
+            ingredientsList.removeChild(ingredientDiv);
+        };
+        ingredientDiv.appendChild(input);
+        ingredientDiv.appendChild(removeButton);
+        ingredientsList.appendChild(ingredientDiv);
     } else {
         console.error('Ingredients list element not found');
     }
@@ -123,10 +132,19 @@ window.addIngredient = function() {
 window.addInstruction = function() {
     const instructionsList = document.getElementById('instructions-list');
     if (instructionsList) {
+        const instructionDiv = document.createElement('div');
         const input = document.createElement('input');
         input.type = 'text';
         input.name = 'instructions';
-        instructionsList.appendChild(input);
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.textContent = 'Remove';
+        removeButton.onclick = function() {
+            instructionsList.removeChild(instructionDiv);
+        };
+        instructionDiv.appendChild(input);
+        instructionDiv.appendChild(removeButton);
+        instructionsList.appendChild(instructionDiv);
     } else {
         console.error('Instructions list element not found');
     }
@@ -134,8 +152,12 @@ window.addInstruction = function() {
 
 window.saveRecipe = async function() {
     const recipeName = document.getElementById('recipe-name').value;
-    const ingredients = Array.from(document.getElementsByName('ingredients')).map(input => input.value);
-    const instructions = Array.from(document.getElementsByName('instructions')).map(input => input.value);
+    const ingredients = Array.from(document.getElementsByName('ingredients'))
+        .map(input => input.value)
+        .filter(value => value.trim() !== '');
+    const instructions = Array.from(document.getElementsByName('instructions'))
+        .map(input => input.value)
+        .filter(value => value.trim() !== '');
 
     const recipeId = new URLSearchParams(window.location.search).get('id');
     const recipeData = { name: recipeName, ingredients, instructions };

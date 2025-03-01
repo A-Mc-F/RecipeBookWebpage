@@ -89,12 +89,25 @@ window.confirmMealPlan = async function() {
     shoppingListPage.innerHTML = `
         <h1>Shopping List</h1>
         <ul id="shopping-list">
-            ${ingredients.map((ingredient) => `<li>${ingredient}</li>`).join('')}
+            ${ingredients.map((ingredient) => `<li onclick="toggleStrikethrough(this)">${ingredient}</li>`).join('')}
         </ul>
         <button onclick="goBackToMealPlanner()">Back to Meal Planner</button>
     `;
     document.body.innerHTML = '';
     document.body.appendChild(shoppingListPage);
+}
+
+window.toggleStrikethrough = function(element) {
+    const parent = element.parentElement;
+    if (element.style.textDecoration === 'line-through') {
+        element.style.textDecoration = 'none';
+        // Move the element to the top of the list
+        parent.insertBefore(element, parent.firstChild);
+    } else {
+        element.style.textDecoration = 'line-through';
+        // Move the element to the bottom of the list
+        parent.appendChild(element);
+    }
 }
 
 window.goBackToMealPlanner = function() {
