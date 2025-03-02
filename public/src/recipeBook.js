@@ -76,8 +76,6 @@ window.openRecipePopup = async function(recipeId = null) {
             });
         } else {
             titleElement.textContent = 'Add Recipe';
-            addIngredient();
-            addInstruction();
         }
 
         openPopup();
