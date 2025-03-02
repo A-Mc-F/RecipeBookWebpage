@@ -52,69 +52,56 @@ window.closePopup = function() {
     }
 }
 
-window.addRecipe = function() {
+window.openRecipePopup = async function(recipeId = null) {
     const titleElement = document.getElementById('popup-title');
     const formElement = document.getElementById('modify-recipe-form');
     const ingredientsList = document.getElementById('ingredients-list');
     const instructionsList = document.getElementById('instructions-list');
 
     if (titleElement && formElement && ingredientsList && instructionsList) {
-        titleElement.textContent = 'Add Recipe';
         formElement.reset();
-        ingredientsList.innerHTML = '<input type="text" name="ingredients">';
-        instructionsList.innerHTML = '<input type="text" name="instructions">';
+        ingredientsList.innerHTML = '';
+        instructionsList.innerHTML = '';
+
+        if (recipeId) {
+            titleElement.textContent = 'Modify Recipe';
+            const recipeData = await getRecipeData(recipeId);
+            document.getElementById('recipe-id').value = recipeId;
+            document.getElementById('recipe-name').value = recipeData.name;
+            recipeData.ingredients.forEach(ingredient => {
+                addIngredient(ingredient);
+            });
+            recipeData.instructions.forEach(instruction => {
+                addInstruction(instruction);
+            });
+        } else {
+            titleElement.textContent = 'Add Recipe';
+            addIngredient();
+            addInstruction();
+        }
+
         openPopup();
     } else {
         console.error(`One or more elements not found ${titleElement} ${formElement} ${ingredientsList} ${instructionsList}`);
     }
 };
 
-window.modifyRecipe = async function (recipeId) {
-    const titleElement = document.getElementById('popup-title');
-    const recipeNameElement = document.getElementById('recipe-name');
-    const ingredientsList = document.getElementById('ingredients-list');
-    const instructionsList = document.getElementById('instructions-list');
-
-    if (titleElement && recipeNameElement && ingredientsList && instructionsList) {
-        titleElement.textContent = 'Modify Recipe';
-        const recipeData = await getRecipeData(recipeId);
-        recipeNameElement.value = recipeData.name;
-        ingredientsList.innerHTML = '';
-        recipeData.ingredients.forEach(ingredient => {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.name = 'ingredients';
-            input.value = ingredient;
-            ingredientsList.appendChild(input);
-        });
-        instructionsList.innerHTML = '';
-        recipeData.instructions.forEach(instruction => {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.name = 'instructions';
-            input.value = instruction;
-            instructionsList.appendChild(input);
-        });
-        openPopup();
-    } else {
-        console.error(`One or more elements not found ${titleElement} ${recipeNameElement} ${ingredientsList} ${instructionsList}`);
-    }
+window.addRecipe = function() {
+    openRecipePopup();
 };
 
-window.deleteRecipe = async function(recipeId) {
-    if (confirm(`Are you sure you want to delete ${recipeId}?`)) {
-        await deleteDoc(doc(db, "recipes", recipeId));
-        loadRecipeBook();
-    }
+window.modifyRecipe = function(recipeId) {
+    openRecipePopup(recipeId);
 };
 
-window.addIngredient = function() {
+window.addIngredient = function(value = '') {
     const ingredientsList = document.getElementById('ingredients-list');
     if (ingredientsList) {
         const ingredientDiv = document.createElement('div');
         const input = document.createElement('input');
         input.type = 'text';
         input.name = 'ingredients';
+        input.value = value;
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
         removeButton.textContent = 'Remove';
@@ -129,13 +116,14 @@ window.addIngredient = function() {
     }
 };
 
-window.addInstruction = function() {
+window.addInstruction = function(value = '') {
     const instructionsList = document.getElementById('instructions-list');
     if (instructionsList) {
         const instructionDiv = document.createElement('div');
         const input = document.createElement('input');
         input.type = 'text';
         input.name = 'instructions';
+        input.value = value;
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
         removeButton.textContent = 'Remove';
@@ -151,6 +139,7 @@ window.addInstruction = function() {
 };
 
 window.saveRecipe = async function() {
+    const recipeId = document.getElementById('recipe-id').value;
     const recipeName = document.getElementById('recipe-name').value;
     const ingredients = Array.from(document.getElementsByName('ingredients'))
         .map(input => input.value)
@@ -159,7 +148,6 @@ window.saveRecipe = async function() {
         .map(input => input.value)
         .filter(value => value.trim() !== '');
 
-    const recipeId = new URLSearchParams(window.location.search).get('id');
     const recipeData = { name: recipeName, ingredients, instructions };
 
     if (recipeId) {
@@ -170,6 +158,13 @@ window.saveRecipe = async function() {
 
     closePopup();
     loadRecipeBook();
+};
+
+window.deleteRecipe = async function(recipeId) {
+    if (confirm(`Are you sure you want to delete ${recipeId}?`)) {
+        await deleteDoc(doc(db, "recipes", recipeId));
+        loadRecipeBook();
+    }
 };
 
 async function getRecipeData(recipeId) {
