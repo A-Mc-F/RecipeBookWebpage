@@ -27,7 +27,7 @@ async function loadRecipeBook() {
         const optionsCell = row.insertCell(1);
 
         titleCell.textContent = recipe.name;
-        optionsCell.innerHTML = `<div class="button-container"><button class="icon-button" onclick="modifyRecipe('${doc.id}')"><img src="../icons/edit.png" alt="Edit the recipe"></button><button class="icon-button" onclick="deleteRecipe('${doc.id}')"><img src="../icons/delete.png" alt="Delete the recipe"></button></div>`;
+        optionsCell.innerHTML = `<div class="button-container"><button class="icon-button" onclick="modifyRecipe('${doc.id}')"><img src="../icons/edit.png" alt="Edit the recipe"></button><button class="icon-button" onclick="deleteRecipe('${doc.id}','${recipe.name}')"><img src="../icons/delete.png" alt="Delete the recipe"></button></div>`;
     });
 }
 
@@ -149,8 +149,8 @@ window.saveRecipe = async function() {
     loadRecipeBook();
 };
 
-window.deleteRecipe = async function(recipeId) {
-    if (confirm(`Are you sure you want to delete ${recipeId}?`)) {
+window.deleteRecipe = async function(recipeId, recipeName) {
+    if (confirm(`Are you sure you want to delete ${recipeName}?`)) {
         await deleteDoc(doc(db, "recipes", recipeId));
         loadRecipeBook();
     }
