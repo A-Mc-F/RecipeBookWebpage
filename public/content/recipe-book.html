@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Book</title>
     <link rel="stylesheet" href="../styles.css">
 </head>
+
 <body>
     <div class="header">
         <a href="../index.html" class="icon-button">
@@ -39,19 +41,41 @@
         <div class="modal-content">
             <h1 id="popup-title">Modify Recipe</h1>
             <form id="modify-recipe-form">
-                <param type="hidden" id="recipe-id" name="recipe-id"></param>
+                <param type="hidden" id="recipe-id" name="recipe-id">
+                </param>
                 <label for="recipe-name">Name:</label>
                 <input type="text" id="recipe-name" name="recipe-name">
-                <label for="ingredients">Ingredients:</label>
-                <div id="ingredients-list">
+                <div style="
+                display: flex;
+                flex-direction: row;
+                align-items: center;">
+                    <label>Ingredients:</label>
+                    <div class="button-container">
+                        <button class="icon-button" onclick="addBlankIngredient(event)">
+                            <img src="../icons/plus.png">
+                        </button>
+                    </div>
+                </div>
+                <div id="ingredients-list" class="list">
+                    <!-- Ingredients will be inserted here -->
                     <input type="text" name="ingredients">
                 </div>
-                <button type="button" onclick="addIngredient()">Add Ingredient</button>
-                <label for="instructions">Instructions:</label>
-                <div id="instructions-list">
+
+                <div style="
+                display: flex;
+                flex-direction: row;
+                align-items: center;">
+                    <label>Instructions:</label>
+                    <div class="button-container">
+                        <button class="icon-button" onclick="addBlankInstruction(event)">
+                            <img src="../icons/plus.png">
+                        </button>
+                    </div>
+                </div>
+                <div id="instructions-list" class="list">
+                    <!-- Instructions will be inserted here -->
                     <input type="text" name="instructions">
                 </div>
-                <button type="button" onclick="addInstruction()">Add Instruction</button>
                 <button type="button" onclick="saveRecipe()">Save</button>
                 <button type="button" onclick="closePopup()">Cancel</button>
             </form>
@@ -68,4 +92,5 @@
     </script>
     <script type="module" src="../src/recipeBook.js"></script>
 </body>
+
 </html>
