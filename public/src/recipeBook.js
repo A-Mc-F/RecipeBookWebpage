@@ -69,10 +69,10 @@ window.openRecipePopup = async function(recipeId = null) {
             document.getElementById('recipe-id').value = recipeId;
             document.getElementById('recipe-name').value = recipeData.name;
             recipeData.ingredients.forEach(ingredient => {
-                addIngredient(ingredient);
+                addListElement('ingredients-list', 'ingredients', ingredient);
             });
             recipeData.instructions.forEach(instruction => {
-                addInstruction(instruction);
+                addListElement('instructions-list', 'instructions', instruction);
             });
         } else {
             titleElement.textContent = 'Add Recipe';
@@ -94,48 +94,39 @@ window.modifyRecipe = function(recipeId) {
     openRecipePopup(recipeId);
 };
 
-window.addIngredient = function(value = '') {
-    const ingredientsList = document.getElementById('ingredients-list');
-    if (ingredientsList) {
-        const ingredientDiv = document.createElement('div');
+window.addListElement = function (listId, elementType, value = '') {
+    const list = document.getElementById(listId);
+    if (list) {
+        const div = document.createElement('div');
+        div.classList.add('list-element');
         const input = document.createElement('input');
         input.type = 'text';
-        input.name = 'ingredients';
+        input.name = elementType;
         input.value = value;
         const removeButton = document.createElement('button');
-        removeButton.type = 'button';
-        removeButton.textContent = 'Remove';
-        removeButton.onclick = function() {
-            ingredientsList.removeChild(ingredientDiv);
+        removeButton.classList.add('icon-button');
+        removeButton.innerHTML = '<img src="../icons/delete.png">';
+        removeButton.onclick = function () {
+            list.removeChild(div);
         };
-        ingredientDiv.appendChild(input);
-        ingredientDiv.appendChild(removeButton);
-        ingredientsList.appendChild(ingredientDiv);
+        div.appendChild(input);
+        div.appendChild(removeButton);
+
+        list.appendChild(div);
     } else {
-        console.error('Ingredients list element not found');
+        console.error(`${listId} element not found`);
     }
 };
 
-window.addInstruction = function(value = '') {
-    const instructionsList = document.getElementById('instructions-list');
-    if (instructionsList) {
-        const instructionDiv = document.createElement('div');
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.name = 'instructions';
-        input.value = value;
-        const removeButton = document.createElement('button');
-        removeButton.type = 'button';
-        removeButton.textContent = 'Remove';
-        removeButton.onclick = function() {
-            instructionsList.removeChild(instructionDiv);
-        };
-        instructionDiv.appendChild(input);
-        instructionDiv.appendChild(removeButton);
-        instructionsList.appendChild(instructionDiv);
-    } else {
-        console.error('Instructions list element not found');
-    }
+
+window.addBlankIngredient = function (event) {
+    event.preventDefault()
+    addListElement('ingredients-list', 'ingredients');
+};
+
+window.addBlankInstruction = function (event) {
+    event.preventDefault()
+    addListElement('instructions-list', 'instructions');
 };
 
 window.saveRecipe = async function() {

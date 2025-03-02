@@ -16,6 +16,10 @@ body {
     padding: 5px;
 }
 
+.list{
+    width: 100%;
+}
+
 footer {
     width: 100%;
     background-color: #f1f1f1;
@@ -148,6 +152,14 @@ form label, form input, form select, form textarea, form button {
 
 .hidden-id {
     display: none;
+}
+
+.list-element {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
 }
 
 .scrollable-list {
