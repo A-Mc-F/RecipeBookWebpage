@@ -1,11 +1,12 @@
 body {
     font-family: Arial, sans-serif;
+    font-size: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    height: 70vh;
-    margin: 0;
+    min-height: 100vh;
+    margin: 5px;
 }
 .header {
     display: flex;
@@ -14,6 +15,16 @@ body {
     width: 100%;
     padding: 5px;
 }
+
+footer {
+    width: 100%;
+    background-color: #f1f1f1;
+    text-align: center;
+    padding: 10px 10px;
+    position: relative;
+    bottom: 5px;
+}
+
 .icon-button {
     background: none;
     border: none;
@@ -28,10 +39,9 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: top;
     width: 80%;
     max-width: 800px;
-    margin-top: 10px;
 }
 .button-container {
     display: flex;
@@ -47,7 +57,7 @@ body {
 }
 .table-container th, .table-container td {
     border: 1px solid #ddd;
-    padding: 4px;
+    padding: 2px;
 }
 
 .table-container th:nth-child(2), .table-container td:nth-child(2) {
@@ -61,6 +71,7 @@ body {
 
 h1 {
     text-align: center;
+    margin: 10px 5px;
 }
 
 nav ul {
@@ -131,8 +142,8 @@ form label, form input, form select, form textarea, form button {
     padding: 10px;
 }
 .icon-button img {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
 }
 
 .hidden-id {
