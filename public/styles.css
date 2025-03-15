@@ -33,7 +33,7 @@ footer {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 10px;
+    padding: 5px;
 }
 .icon-button img {
     width: 24px;
@@ -102,10 +102,16 @@ form {
 }
 
 form label, form input, form select, form textarea, form button {
-    margin: 5px 0;
-    width: 90%; /* Make inputs fill the form width */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    box-sizing: border-box; /* Include padding and border in the width */
     font-size: 16px;
+    margin: 5px;
+}
+
+form input
+{
+    width: 100%;
+    padding: 5px;
+    margin: 5px 0;
 }
 
 /* Modal styles */
@@ -143,7 +149,7 @@ form label, form input, form select, form textarea, form button {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 10px;
+    padding: 5px;
 }
 .icon-button img {
     width: 20px;
@@ -157,7 +163,6 @@ form label, form input, form select, form textarea, form button {
 .list-element {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
     align-items: center;
     padding: 5px;
 }
