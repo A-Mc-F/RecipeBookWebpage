@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, query, limit, getDoc, doc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, query, limit, getDoc, doc, getDocsFromServer } from "firebase/firestore";
 import { RecipeObject, recipeConverter } from './recipeObject.js';
 
 const firebaseConfig = {
@@ -13,9 +13,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const recipesCol = collection(db, 'recipes');
+
 
 async function fetchRecipes() {
-    const recipesCol = collection(db, 'recipes');
     const recipesSnapshot = await getDocs(query(recipesCol));
     const recipeList = document.getElementById('recipe-list');
     recipeList.innerHTML = '';
@@ -49,19 +50,26 @@ window.removeFromMealPlan = function(button) {
 }
 
 window.randomRecipe = async function() {
-    const recipesCol = collection(db, 'recipes');
-    const recipesSnapshot = await getDocs(recipesCol);
+    const recipesSnapshot = await getDocsFromServer(query(recipesCol));
     const allRecipes = [];
     recipesSnapshot.forEach(doc => {
         const recipe = doc.data();
         allRecipes.push({ name: recipe.name, id: doc.id });
     });
     const mealPlan = document.getElementById('meal-plan');
-    const currentRecipes = Array.from(mealPlan.children).map(item => item.querySelector('span').innerText);
-    const availableRecipes = allRecipes.filter(recipe => !currentRecipes.includes(recipe.name));
+    const currentRecipeIds = Array.from(mealPlan.children).map(item => item.querySelector('.hidden-id').innerText);
+    const availableRecipes = allRecipes.filter(recipe => !currentRecipeIds.includes(recipe.id));
+
+    console.log('Current Recipe IDs:', currentRecipeIds);
+    console.log('Available Recipes:', availableRecipes);
+
     if (availableRecipes.length > 0) {
         const randomRecipe = availableRecipes[Math.floor(Math.random() * availableRecipes.length)];
         addToMealPlan(randomRecipe.name, randomRecipe.id);
+    }
+    else
+    {
+        alert('No more unique recipes to add! You must be hungry!🫃');
     }
 }
 
