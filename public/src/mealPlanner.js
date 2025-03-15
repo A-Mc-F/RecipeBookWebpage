@@ -16,7 +16,7 @@ const db = getFirestore(app);
 
 async function fetchRecipes() {
     const recipesCol = collection(db, 'recipes');
-    const recipesSnapshot = await getDocs(query(recipesCol, limit(8)));
+    const recipesSnapshot = await getDocs(query(recipesCol));
     const recipeList = document.getElementById('recipe-list');
     recipeList.innerHTML = '';
     recipesSnapshot.forEach(doc => {
