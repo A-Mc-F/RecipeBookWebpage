@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meal Planner</title>
     <link rel="stylesheet" href="../styles.css">
 </head>
+
 <body>
     <div class="header">
         <a href="../index.html" class="icon-button">
@@ -13,7 +15,12 @@
         </a>
         <h1>Meal Planner</h1>
     </div>
-    <div class="content-container">
+    <!-- Load Mealplan Section -->
+    <div id="login-section" style="margin: 10px 0;">
+        <input type="text" id="username-input" placeholder="Enter Mealplan Name" />
+        <button onclick="loginWithUsername()">Load Mealplan</button>
+    </div>
+    <div class="content-container" id="main-content" style="display:none;">
         <div class="recipe-list">
             <h2>Recipe List</h2>
             <div class="scrollable-list" id="recipe-list">
@@ -33,15 +40,17 @@
             </div>
         </div>
     </div>
-    <button type="button" onclick="confirmMealPlan()">Confirm Meal Plan</button>
+    <button type="button" onclick="confirmMealPlan()" id="confirm-btn" style="display:none;">Confirm Meal Plan</button>
     <script type="importmap">
     {
         "imports": {
             "firebase/app": "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js",
-            "firebase/firestore": "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js"
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js",
+            "firebase/auth": "https://www.gstatic.com/firebasejs/11.3.0/firebase-auth.js"
         }
     }
     </script>
     <script type="module" src="../src/mealPlanner.js"></script>
 </body>
+
 </html>
