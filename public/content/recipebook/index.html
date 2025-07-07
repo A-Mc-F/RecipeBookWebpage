@@ -5,20 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Book</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body>
-    <div class="header">
-        <a href="../index.html" class="icon-button">
-            <img src="../icons/home.png" alt="Back">
+    <header>
+        <a href="../../index.html" class="icon-button">
+            <img src="../../icons/home.png" alt="Back">
         </a>
         <h1>Recipe Book</h1>
-    </div>
+    </header>
+
+
+
     <div class="content-container">
         <div class="button-container">
             <button class="icon-button" onclick="addRecipe()">
-                <img src="../icons/plus.png" alt="Add New Recipe">
+                <img src="../../icons/plus.png" alt="Add New Recipe">
             </button>
         </div>
         <div class="table-container">
@@ -56,7 +59,7 @@
                 </div>
                 <div class="button-container">
                     <button class="icon-button" onclick="addBlankIngredient(event)">
-                        <img src="../icons/plus.png">
+                        <img src="../../icons/plus.png">
                     </button>
                 </div>
                 <hr style="border: 0; height: 2px; width: 250px; background-color: rgb(59, 59, 59);">
@@ -72,7 +75,7 @@
                 </div>
                 <div class="button-container">
                     <button class="icon-button" onclick="addBlankInstruction(event)">
-                        <img src="../icons/plus.png">
+                        <img src="../../icons/plus.png">
                     </button>
                 </div>
                 <hr style="border: 0; height: 2px; width: 250px; background-color: rgb(59, 59, 59);">
@@ -82,15 +85,8 @@
         </div>
     </div>
 
-    <script type="importmap">
-    {
-        "imports": {
-            "firebase/app": "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js",
-            "firebase/firestore": "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js"
-        }
-    }
-    </script>
-    <script type="module" src="../src/recipeBook.js"></script>
+
+    <script type="module" src="recipeBook.js"></script>
 </body>
 
 </html>

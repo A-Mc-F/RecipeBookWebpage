@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, doc, deleteDoc, getDoc, setDoc } from "firebase/firestore";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyB7fE3GsZIxyfE7twzsUnycLCk4tx0xzU4",
@@ -27,14 +27,19 @@ async function loadRecipeBook() {
         const optionsCell = row.insertCell(1);
 
         titleCell.textContent = recipe.name;
-        optionsCell.innerHTML = `<div class="button-container"><button class="icon-button" onclick="modifyRecipe('${doc.id}')"><img src="../icons/edit.png" alt="Edit the recipe"></button><button class="icon-button" onclick="deleteRecipe('${doc.id}','${recipe.name}')"><img src="../icons/delete.png" alt="Delete the recipe"></button></div>`;
+        optionsCell.innerHTML = `
+        <div class="button-container">
+        <button class="icon-button" onclick="modifyRecipe('${doc.id}')"><img src="../../icons/edit.png" alt="Edit the recipe"></button>
+        <button class="icon-button" onclick="deleteRecipe('${doc.id}','${recipe.name}')"><img src="../../icons/delete.png" alt="Delete the recipe"></button>
+        </div>
+        `;
     });
 }
 
 window.loadRecipeBook = loadRecipeBook;
 loadRecipeBook();
 
-window.openPopup = function() {
+window.openPopup = function () {
     const modal = document.getElementById('modify-recipe-modal');
     if (modal) {
         modal.style.display = 'block';
@@ -43,7 +48,7 @@ window.openPopup = function() {
     }
 }
 
-window.closePopup = function() {
+window.closePopup = function () {
     const modal = document.getElementById('modify-recipe-modal');
     if (modal) {
         modal.style.display = 'none';
@@ -52,7 +57,7 @@ window.closePopup = function() {
     }
 }
 
-window.openRecipePopup = async function(recipeId = null) {
+window.openRecipePopup = async function (recipeId = null) {
     const titleElement = document.getElementById('popup-title');
     const formElement = document.getElementById('modify-recipe-form');
     const ingredientsList = document.getElementById('ingredients-list');
@@ -84,11 +89,11 @@ window.openRecipePopup = async function(recipeId = null) {
     }
 };
 
-window.addRecipe = function() {
+window.addRecipe = function () {
     openRecipePopup();
 };
 
-window.modifyRecipe = function(recipeId) {
+window.modifyRecipe = function (recipeId) {
     openRecipePopup(recipeId);
 };
 
@@ -116,7 +121,6 @@ window.addListElement = function (listId, elementType, value = '') {
     }
 };
 
-
 window.addBlankIngredient = function (event) {
     event.preventDefault()
     addListElement('ingredients-list', 'ingredients');
@@ -127,7 +131,7 @@ window.addBlankInstruction = function (event) {
     addListElement('instructions-list', 'instructions');
 };
 
-window.saveRecipe = async function() {
+window.saveRecipe = async function () {
     const recipeId = document.getElementById('recipe-id').value;
     const recipeName = document.getElementById('recipe-name').value;
     const ingredients = Array.from(document.getElementsByName('ingredients'))
@@ -149,7 +153,7 @@ window.saveRecipe = async function() {
     loadRecipeBook();
 };
 
-window.deleteRecipe = async function(recipeId, recipeName) {
+window.deleteRecipe = async function (recipeId, recipeName) {
     if (confirm(`Are you sure you want to delete ${recipeName}?`)) {
         await deleteDoc(doc(db, "recipes", recipeId));
         loadRecipeBook();

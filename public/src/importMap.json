@@ -1,6 +1,0 @@
-{
-    "imports": {
-        "firebase/app": "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js",
-        "firebase/firestore": "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js"
-    }
-}
