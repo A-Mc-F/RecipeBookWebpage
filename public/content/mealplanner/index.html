@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Planner</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <a href="../../index.html" class="icon-button">
+            <img src="../../icons/home.png" alt="Back">
+        </a>
+        <h1>Meal Planner</h1>
+    </header>
+
+    <!-- Load Mealplan Section -->
+    <div id="login-section" style="margin: 10px 0;">
+        <input type="text" id="mealplanname-input" placeholder="Enter Mealplan Name" />
+        <button id="load-mealplan-btn">Load Mealplan</button>
+    </div>
+
+    <div id="main-content" style="display:none;">
+        <!-- Stage Slider -->
+        <div class="slider" id="stage-slider">
+            <label>
+                <input type="radio" name="stage" value="Plan" checked>
+                <span>Plan</span>
+            </label>
+            <label>
+                <input type="radio" name="stage" value="Shop">
+                <span>Shop</span>
+            </label>
+            <div class="slider-bar"></div>
+        </div>
+
+        <!-- Meal Plan Editor -->
+        <div id="meal-plan-editor"></div>
+
+        <!-- Shopping List -->
+        <div id="shopping-list" style="display: none;">
+            <!-- Sort Mode Slider -->
+            <div class="slider" id="sort-slider" style="display:none;">
+                <label>
+                    <input type="radio" name="sortMode" value="recipe" checked>
+                    <span>By Recipe</span>
+                </label>
+                <label>
+                    <input type="radio" name="sortMode" value="alpha">
+                    <span>Alphabetically</span>
+                </label>
+                <label>
+                    <input type="radio" name="sortMode" value="type">
+                    <span>By Item Type</span>
+                </label>
+                <div class="slider-bar"></div>
+            </div>
+        </div>
+
+        <!-- Recipe selection modal -->
+        <div id="recipe-modal" class="modal">
+            <div class="modal-content" id="recipe-modal-content">
+                <span class="close" onclick="closeRecipeModal()">&times;</span>
+                <h2>Select a Recipe</h2>
+                <button class="icon-button" onclick="addRandomRecipeToCurrentGroup()"><img src="../../icons/random.png"
+                        alt="Random"></button>
+                <div id="recipe-list-modal"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="mealPlaner.js"></script>
+    <script type="module" src="dataHandler.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+
+</html>
