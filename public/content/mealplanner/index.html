@@ -38,12 +38,16 @@
         </div>
 
         <!-- Meal Plan Editor -->
-        <div id="meal-plan-editor"></div>
+        <div id="meal-plan-section" style="display: none;">
+            <div id="meal-plan-container">
+                <!-- Meal Plan will be rendered here -->
+            </div>
+        </div>
 
         <!-- Shopping List -->
-        <div id="shopping-list" style="display: none;">
+        <div id="shopping-list-section" style="display: none;">
             <!-- Sort Mode Slider -->
-            <div class="slider" id="sort-slider" style="display:none;">
+            <div class="slider" id="sort-slider">
                 <label>
                     <input type="radio" name="sortMode" value="recipe" checked>
                     <span>By Recipe</span>
@@ -52,12 +56,15 @@
                     <input type="radio" name="sortMode" value="alpha">
                     <span>Alphabetically</span>
                 </label>
-                <label>
-                    <input type="radio" name="sortMode" value="type">
-                    <span>By Item Type</span>
-                </label>
                 <div class="slider-bar"></div>
             </div>
+            <div id="shopping-list-container">
+                <!-- Shopping List will be rendered here -->
+            </div>
+            <input type="text" id="misc-item-input" placeholder="Add Miscellaneous Item">
+            <button id="add-misc-item-btn" class="icon-button" onclick="addMiscShoppingItem()">
+                <img src="../../icons/plus.png" alt="Add Misc Item">
+            </button>
         </div>
 
         <!-- Recipe selection modal -->

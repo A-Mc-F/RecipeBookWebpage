@@ -1,3 +1,22 @@
+
+/**
+ * @typedef {Object} MealPlanItem
+ * @property {'day'|'meal'|'recipe'|'other'|'misc_group'|'misc'} type
+ * @property {string} [name]         // For 'day', 'meal', 'misc_group'
+ * @property {string} [text]         // For 'other', 'misc'
+ * @property {string} [recipeId]     // For 'recipe'
+ * @property {MealPlanItem[]} [items]// For 'day', 'meal', 'misc_group'
+ */
+
+/**
+ * @typedef {Object} MealPlan
+ * @property {string} name
+ * @property {'mealPlan'} type
+ * @property {MealPlanItem[]} items
+ */
+
+
+
 // --- Meal plan change listener ---
 let onMealPlanChange = null;
 export function setMealPlanChangeListener(cb) { onMealPlanChange = cb; }
@@ -19,7 +38,7 @@ const db = getFirestore(app);
 
 
 let allRecipes = [];
-let mealPlanData = [];
+let mealPlanData = /** @type { MealPlan } */ ({ name: '', type: 'mealPlan', items: [] });
 let mealplanName = null;
 
 // --- Fetch all recipes from Firestore ---
@@ -32,6 +51,10 @@ await fetchAllRecipes();
 
 export function getAllRecipes() {
     return allRecipes;
+}
+
+export function getRecipeByID(id) {
+    return allRecipes.find(recipe => recipe.id === id);
 }
 
 export function getMealplanName() {
@@ -93,4 +116,25 @@ export function updateMealPlanItem(parentPath, idx, newData) {
         arr = arr[parentPath[i]].items;
     }
     arr[idx] = { ...arr[idx], ...newData };
+}
+
+export function getItemPath(type, name) {
+    //perform a breadth-first search for an item with the given type and name and returns the path as an array of indices
+    function bfs(items, path = []) {
+        const queue = [{ items, path }];
+        while (queue.length > 0) {
+            const { items, path } = queue.shift();
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (item.type === type && item.name === name) {
+                    return [...path, i];
+                }
+                if (item.items) {
+                    queue.push({ items: item.items, path: [...path, i] });
+                }
+            }
+        }
+        return null;
+    }
+    return bfs(mealPlanData.items);
 }

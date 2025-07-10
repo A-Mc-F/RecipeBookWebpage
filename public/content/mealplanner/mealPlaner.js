@@ -4,7 +4,7 @@ import { openRecipeModal } from "./recipeSelector.js";
 
 // --- Render the meal plan recursively ---
 export function renderMealPlan() {
-    const html_object = document.getElementById('meal-plan-editor');
+    const html_object = document.getElementById('meal-plan-container');
     html_object.innerHTML = '';
     const mealplanData = getMealplanData();
     renderMealPlanContainer(html_object, mealplanData, []);
@@ -16,6 +16,11 @@ setMealPlanChangeListener(renderMealPlan);
 
 function renderMealPlanContainer(html_element, container, parentPath = []) {
     html_element.innerHTML = '';
+
+    if (!container || !container.items || container.items.length === 0) {
+        html_element.appendChild(plusTile(container, parentPath));
+        return; // No items to render
+    }
 
     container.items.forEach((item, idx) => {
         const path = parentPath.concat(idx);
@@ -29,7 +34,7 @@ function renderMealPlanContainer(html_element, container, parentPath = []) {
         row.style.alignItems = 'center';
         row.style.gap = '0.5em';
 
-        if (item.type === 'day' || item.type === 'meal') {
+        if (item.type === 'day' || item.type === 'meal' || item.type === 'misc_group') {
             // Editable name
             const input = document.createElement('input');
             input.type = 'text';
@@ -74,7 +79,7 @@ function renderMealPlanContainer(html_element, container, parentPath = []) {
             row.appendChild(removeBtn);
 
             el.appendChild(row);
-        } else if (item.type === 'other') {
+        } else if (item.type === 'other' || item.type === 'misc') {
             const input = document.createElement('input');
             input.type = 'text';
             input.value = item.text || '';
@@ -100,14 +105,17 @@ function renderMealPlanContainer(html_element, container, parentPath = []) {
         html_element.appendChild(el);
     });
 
-    // Plus tile at the end
+    html_element.appendChild(plusTile(container, parentPath));
+}
+
+function plusTile(container, parentPath) {
     const plusTile = document.createElement('div');
     plusTile.className = 'mealplan-plus-tile';
     plusTile.innerHTML = '<img src="../../icons/plus.png" alt="Add">';
     plusTile.onclick = e => {
         showAddItemMenu(plusTile, container, parentPath);
     };
-    html_element.appendChild(plusTile);
+    return plusTile;
 }
 
 // --- Show add-item menu ---

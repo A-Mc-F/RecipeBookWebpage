@@ -9,6 +9,7 @@ body {
     margin: 5px;
     background: #f8fafc;
 }
+
 .home-tiles {
     display: flex;
     flex-wrap: wrap;
@@ -34,7 +35,7 @@ body {
     height: 160px;
     background: #fff;
     border-radius: 18px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 1.5px 4px rgba(0, 0, 0, 0.06);
     text-decoration: none;
     color: #222;
     font-weight: 500;
@@ -44,13 +45,16 @@ body {
     border: 2px solid #e0e7ef;
     overflow: hidden;
 }
-.home-tile:hover, .home-tile:focus {
+
+.home-tile:hover,
+.home-tile:focus {
     transform: translateY(-6px) scale(1.04);
-    box-shadow: 0 6px 24px rgba(76,175,80,0.13), 0 2px 8px rgba(0,0,0,0.10);
+    box-shadow: 0 6px 24px rgba(76, 175, 80, 0.13), 0 2px 8px rgba(0, 0, 0, 0.10);
     background: #f0fdf4;
     color: #388e3c;
     border-color: #b2f2bb;
 }
+
 .home-tile-icon-container {
     display: flex;
     align-items: center;
@@ -59,6 +63,7 @@ body {
     height: 100%;
     position: relative;
 }
+
 .home-tile-icon {
     width: 1in;
     height: 1in;
@@ -67,15 +72,18 @@ body {
     box-sizing: border-box;
     object-fit: contain;
 }
-.home-tile:hover .home-tile-icon, .home-tile:focus .home-tile-icon {
+
+.home-tile:hover .home-tile-icon,
+.home-tile:focus .home-tile-icon {
     border-color: #888;
 }
+
 .home-tile-banner {
     position: absolute;
     left: 0;
     right: 0;
     bottom: -40px;
-    background: rgba(60,60,60,0.97);
+    background: rgba(60, 60, 60, 0.97);
     color: #fff;
     font-size: 1em;
     font-weight: 600;
@@ -85,10 +93,12 @@ body {
     border-bottom-right-radius: 16px;
     opacity: 0;
     pointer-events: none;
-    transition: bottom 0.25s cubic-bezier(.4,1.6,.6,1), opacity 0.25s;
+    transition: bottom 0.25s cubic-bezier(.4, 1.6, .6, 1), opacity 0.25s;
     z-index: 2;
 }
-.home-tile:hover .home-tile-banner, .home-tile:focus .home-tile-banner {
+
+.home-tile:hover .home-tile-banner,
+.home-tile:focus .home-tile-banner {
     bottom: 0;
     opacity: 1;
     pointer-events: auto;
@@ -102,7 +112,7 @@ header {
     padding: 5px;
 }
 
-.list{
+.list {
     width: 100%;
 }
 
@@ -121,10 +131,12 @@ footer {
     cursor: pointer;
     padding: 5px;
 }
+
 .icon-button img {
     width: 24px;
     height: 24px;
 }
+
 .content-container {
     display: flex;
     flex-direction: column;
@@ -133,27 +145,36 @@ footer {
     width: 80%;
     max-width: 800px;
 }
+
 .button-container {
     display: flex;
     justify-content: flex-end;
     width: 100%;
 }
+
 .table-container {
     width: 100%;
 }
+
 .table-container table {
     width: 100%;
     border-collapse: collapse;
 }
-.table-container th, .table-container td {
+
+.table-container th,
+.table-container td {
     border: 1px solid #ddd;
     padding: 2px;
 }
 
-.table-container th:nth-child(2), .table-container td:nth-child(2) {
-    width: 1%; /* Make the options column as narrow as possible */
-    white-space: nowrap; /* Prevent the content from wrapping */
+.table-container th:nth-child(2),
+.table-container td:nth-child(2) {
+    width: 1%;
+    /* Make the options column as narrow as possible */
+    white-space: nowrap;
+    /* Prevent the content from wrapping */
 }
+
 .table-container th {
     background-color: #f2f2f2;
     text-align: left;
@@ -187,14 +208,18 @@ form {
     align-items: center;
 }
 
-form label, form input, form select, form textarea, form button {
-    box-sizing: border-box; /* Include padding and border in the width */
+form label,
+form input,
+form select,
+form textarea,
+form button {
+    box-sizing: border-box;
+    /* Include padding and border in the width */
     font-size: 16px;
     margin: 5px;
 }
 
-form input
-{
+form input {
     width: 100%;
     padding: 5px;
     margin: 5px 0;
@@ -210,20 +235,27 @@ form input
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgb(0,0,0);
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
 }
+
 .modal-content {
     background-color: #fefefe;
     margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: auto; /* Change width to auto */
-    max-width: 80%; /* Add max-width */
-    height: auto; /* Change height to auto */
-    max-height: 80%; /* Add max-height */
-    overflow-y: auto; /* Add overflow-y for scrolling */
+    width: auto;
+    /* Change width to auto */
+    max-width: 80%;
+    /* Add max-width */
+    height: auto;
+    /* Change height to auto */
+    max-height: 80%;
+    /* Add max-height */
+    overflow-y: auto;
+    /* Add overflow-y for scrolling */
 }
+
 .modal-content iframe {
     width: 100%;
     height: 100%;
@@ -237,6 +269,7 @@ form input
     cursor: pointer;
     padding: 5px;
 }
+
 .icon-button img {
     width: 20px;
     height: 20px;
@@ -254,9 +287,11 @@ form input
 }
 
 .scrollable-list {
-    max-height: 300px; /* Limit to 6 items */
+    max-height: 300px;
+    /* Limit to 6 items */
     width: 100%;
-    overflow-y: auto; /* Add vertical scrollbar */
+    overflow-y: auto;
+    /* Add vertical scrollbar */
     justify-content: center;
 }
 
@@ -267,7 +302,8 @@ form input
 
 .recipe-item {
     display: flex;
-    justify-content: space-between; /* Align name on the left and button on the right */
+    justify-content: space-between;
+    /* Align name on the left and button on the right */
     align-items: center;
 }
 
@@ -287,108 +323,126 @@ form input
     font-size: 20px;
     padding: 10px 18px;
 }
+
 .mealplan-item {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
-  margin: 0.5em 0;
-  padding: 1em;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5em;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+    margin: 0.5em 0.2em;
+    padding: 0.5em 0.2em;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
-.mealplan-group-input, .mealplan-other-input {
-  font-size: 1.1em;
-  padding: 0.4em 0.6em;
-  border-radius: 6px;
-  border: 1px solid #bbb;
-  margin-bottom: 0.5em;
+
+.mealplan-group-input,
+.mealplan-other-input {
+    font-size: 1.1em;
+    padding: 0.4em 0.6em;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    margin-bottom: 0.5em;
 }
+
 .mealplan-remove-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: none;
-  border: none;
-  font-size: 1.2em;
-  cursor: pointer;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
 }
+
 .mealplan-plus-tile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 60px;
-  height: 60px;
-  margin: 1em auto 0 auto;
-  background: #f7f7f7;
-  border-radius: 16px;
-  border: 2px dashed #bbb;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: 6px auto 6px auto;
+    background: #f7f7f7;
+    border-radius: 16px;
+    border: 2px dashed #bbb;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
 }
+
 .mealplan-plus-tile:hover {
-  background: #e0f7e9;
-  border-color: #4caf50;
+    background: #e0f7e9;
+    border-color: #4caf50;
 }
+
 .mealplan-plus-tile img {
-  width: 32px;
-  height: 32px;
+    width: 20px;
+    height: 20px;
 }
+
 .add-item-menu {
-  position: absolute;
-  bottom: 70px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #fff;
-  border: 1px solid #bbb;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.13);
-  padding: 0.5em 1em;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5em;
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.13);
+    padding: 0.5em 1em;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
 }
+
 .add-item-menu button {
-  font-size: 1em;
-  padding: 0.4em 1em;
-  border-radius: 6px;
-  border: 1px solid #bbb;
-  background: #f7f7f7;
-  cursor: pointer;
-  transition: background 0.2s;
+    font-size: 1em;
+    padding: 0.4em 1em;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    background: #f7f7f7;
+    cursor: pointer;
+    transition: background 0.2s;
 }
+
 .add-item-menu button:hover {
-  background: #e0f7e9;
+    background: #e0f7e9;
 }
+
 .modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0; top: 0; width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.4);
-  align-items: center; justify-content: center;
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
 }
+
 .modal-content {
-  background: #fff;
-  border-radius: 12px;
-  padding: 2em;
-  max-width: 400px;
-  margin: 2em auto;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+    background: #fff;
+    border-radius: 12px;
+    padding: 2em;
+    max-width: 400px;
+    margin: 2em auto;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.18);
 }
+
 #recipe-list-modal button {
-  display: block;
-  width: 100%;
-  margin: 0.3em 0;
-  font-size: 1em;
-  border-radius: 6px;
-  border: 1px solid #bbb;
-  background: #f7f7f7;
-  padding: 0.4em 0.6em;
-  cursor: pointer;
+    display: block;
+    width: 100%;
+    margin: 0.3em 0;
+    font-size: 1em;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    background: #f7f7f7;
+    padding: 0.4em 0.6em;
+    cursor: pointer;
 }
+
 #recipe-list-modal button:hover {
-  background: #e0f7e9;
+    background: #e0f7e9;
 }

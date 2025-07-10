@@ -37,7 +37,6 @@ window.onclick = function (event) {
 
 function closeRecipeModal() {
     document.getElementById('recipe-modal').style.display = 'none';
-    currentRecipeTarget = null;
 }
 
 function flattenRecipes(item) {
