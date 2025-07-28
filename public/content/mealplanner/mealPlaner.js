@@ -13,22 +13,39 @@ export function renderMealplan() {
 setMealplanChangeListener(renderMealplan);
 
 function renderMealplanContainer(object) {
+    //-helper
+    let spacer = document.createElement('span')
+    spacer.style.flexGrow = 1
+    //-helper
+
+
     let el = document.createElement('div')
-    el.className = object.type
+    el.className = `${object.type} mealplan-item`;
 
     if (object.type === 'mealplan') {
+        let headingRow = document.createElement('div');
+        headingRow.className = 'heading-row'
+        let mealplanName = document.createElement('h3')
+        mealplanName.innerText = object.name
+        headingRow.appendChild(mealplanName);
+        headingRow.appendChild(spacer)
+        el.appendChild(headingRow)
+
         if (object.items && !(object.items.length === 0)) {
             object.items.forEach((item) => {
                 el.appendChild(renderMealplanContainer(item));
             })
         }
+
         el.appendChild(plusButton(object))
         return el
     }
 
     else if (object.type === 'day' || object.type === 'meal' || object.type === 'misc_group') {
         let headingRow = document.createElement('div');
+        headingRow.className = 'heading-row'
         headingRow.appendChild(textInput(object));
+        headingRow.appendChild(spacer)
         headingRow.appendChild(recipeListButton(object));
         headingRow.appendChild(removeButton(object));
 
@@ -47,18 +64,26 @@ function renderMealplanContainer(object) {
 
     else if (object.type === 'recipe') {
         const recipe = getAllRecipes().find(r => r.id === object.recipeId);
+        let headingRow = document.createElement('div');
+        headingRow.className = 'heading-row'
         const recipeNameDiv = document.createElement('span');
         recipeNameDiv.textContent = recipe ? recipe.name : 'Unknown Recipe';
-        el.appendChild(recipeNameDiv);
-        el.appendChild(recipeListButton(object))
-        el.appendChild(removeButton(object));
+        headingRow.appendChild(recipeNameDiv);
+        headingRow.appendChild(spacer)
+        headingRow.appendChild(recipeListButton(object))
+        headingRow.appendChild(removeButton(object));
+        el.appendChild(headingRow)
         return el
     }
 
     else if (object.type === 'other' || object.type === 'misc') {
-        el.appendChild(textInput(object));
-        el.appendChild(recipeListButton(object));
-        el.appendChild(removeButton(object));
+        let headingRow = document.createElement('div');
+        headingRow.className = 'heading-row'
+        headingRow.appendChild(textInput(object));
+        headingRow.appendChild(spacer)
+        headingRow.appendChild(recipeListButton(object));
+        headingRow.appendChild(removeButton(object));
+        el.appendChild(headingRow)
         return el
     }
 }
@@ -81,6 +106,7 @@ function textInput(object) {
 
     input.className = 'mealplan-input';
     input.onblur = e => {
+        //object.name = input.value
         updateMealplanItem(object, { name: input.value });
     };
     return input;
@@ -117,16 +143,16 @@ function recipeListButton(object) {
 }
 
 function addItem(object) {
+    switch (object.type) {
+        case 'mealplan':
+            addMealplanItem(object, { type: 'day', name: '', items: [] });
+            break;
+        case 'day':
+            addMealplanItem(object, { type: 'meal', name: '', items: [] });
+            break;
 
-    if (object.type === 'mealplan') {
-        addMealplanItem(object, { type: 'day', name: '', items: [] });
-    }
-
-    else if (object.type === 'day') {
-        addMealplanItem(object, { type: 'meal', name: '', items: [] });
-    }
-
-    else if (object.type === 'meal') {
-        addMealplanItem(object, { type: 'other', recipeId: '', items: [] });
+        case 'meal':
+            addMealplanItem(object, { type: 'other', recipeId: '', items: [] });
+            break;
     }
 }

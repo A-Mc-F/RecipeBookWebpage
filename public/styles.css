@@ -324,18 +324,6 @@ form input {
     padding: 10px 18px;
 }
 
-.mealplan-item {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
-    margin: 0.5em 0.2em;
-    padding: 0.5em 0.2em;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
 .mealplan-group-input,
 .mealplan-other-input {
     font-size: 1.1em;
@@ -343,30 +331,6 @@ form input {
     border-radius: 6px;
     border: 1px solid #bbb;
     margin-bottom: 0.5em;
-}
-
-.mealplan-remove-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: none;
-    border: none;
-    font-size: 1.2em;
-    cursor: pointer;
-}
-
-.mealplan-plus-tile {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    margin: 6px auto 6px auto;
-    background: #f7f7f7;
-    border-radius: 16px;
-    border: 2px dashed #bbb;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
 }
 
 .mealplan-plus-tile:hover {
@@ -431,7 +395,7 @@ form input {
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.18);
 }
 
-#recipe-list-modal button {
+#recipe-list button {
     display: block;
     width: 100%;
     margin: 0.3em 0;
@@ -443,6 +407,6 @@ form input {
     cursor: pointer;
 }
 
-#recipe-list-modal button:hover {
+#recipe-list button:hover {
     background: #e0f7e9;
 }

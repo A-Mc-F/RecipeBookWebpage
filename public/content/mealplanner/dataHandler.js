@@ -156,7 +156,8 @@ export function getMealplanItemParent(searchItem) {
 
 //UPDATE
 export function updateMealplanItem(item, newData) {
-    item = { ...item, ...newData };
+    let searchResult = getMealplanItemParent(item)
+    searchResult.parent.items[searchResult.index] = { ...item, ...newData };
     saveMealplanToFirestore();
     notifyChange();
 }
@@ -167,4 +168,12 @@ export function removeMealplanItem(item) {
     searchResult.parent.items.splice(searchResult.index, 1)
     saveMealplanToFirestore();
     notifyChange();
+}
+
+export function replaceMealplanItem(originalItem, newItem) {
+    const searchResult = getMealplanItemParent(originalItem)
+    removeMealplanItem(originalItem)
+    searchResult.parent.items.splice(searchResult.index, 0, newItem)
+    saveMealplanToFirestore()
+    notifyChange()
 }
