@@ -1,26 +1,26 @@
 
 /**
- * @typedef {Object} MealPlanItem
+ * @typedef {Object} MealplanItem
  * @property {'day'|'meal'|'recipe'|'other'|'misc_group'|'misc'} type
  * @property {string} [name]         // For 'day', 'meal', 'misc_group'
  * @property {string} [text]         // For 'other', 'misc'
  * @property {string} [recipeId]     // For 'recipe'
- * @property {MealPlanItem[]} [items]// For 'day', 'meal', 'misc_group'
+ * @property {MealplanItem[]} [items]// For 'day', 'meal', 'misc_group'
  */
 
 /**
- * @typedef {Object} MealPlan
+ * @typedef {Object} Mealplan
  * @property {string} name
- * @property {'mealPlan'} type
- * @property {MealPlanItem[]} items
+ * @property {'mealplan'} type
+ * @property {MealplanItem[]} items
  */
 
 
 
 // --- Meal plan change listener ---
-let onMealPlanChange = null;
-export function setMealPlanChangeListener(cb) { onMealPlanChange = cb; }
-function notifyChange() { if (onMealPlanChange) onMealPlanChange(mealPlanData); }
+let onMealplanChange = null;
+export function setMealplanChangeListener(cb) { onMealplanChange = cb; }
+function notifyChange() { if (onMealplanChange) onMealplanChange(mealplanData); }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
@@ -38,7 +38,7 @@ const db = getFirestore(app);
 
 
 let allRecipes = [];
-let mealPlanData = /** @type { MealPlan } */ ({ name: '', type: 'mealPlan', items: [] });
+let mealplanData = /** @type { Mealplan } */ ({ name: '', type: 'mealplan', items: [] });
 let mealplanName = null;
 
 // --- Fetch all recipes from Firestore ---
@@ -63,78 +63,108 @@ export function getMealplanName() {
 
 export function setMealplanName(name) {
     mealplanName = name;
-    loadMealPlanFromFirestore();
+    loadMealplanFromFirestore();
 }
 
 export function getMealplanData() {
-    return mealPlanData;
+    return mealplanData;
 }
 
-async function saveMealPlanToFirestore() {
+async function saveMealplanToFirestore() {
     if (!mealplanName) return;
-    await setDoc(doc(db, 'mealPlans', mealplanName), {
-        mealPlan: mealPlanData,
+    await setDoc(doc(db, 'mealplans', mealplanName), {
+        mealplan: mealplanData,
         timestamp: new Date()
     });
 }
 
-async function loadMealPlanFromFirestore() {
+async function loadMealplanFromFirestore() {
     if (!mealplanName) return;
-    const mealPlanDoc = await getDoc(doc(db, 'mealPlans', mealplanName));
-    if (mealPlanDoc.exists()) {
-        mealPlanData = mealPlanDoc.data().mealPlan;
+    const mealplanDoc = await getDoc(doc(db, 'mealplans', mealplanName));
+    if (mealplanDoc.exists()) {
+        mealplanData = mealplanDoc.data().mealplan;
     } else {
-        mealPlanData = { name: mealplanName, type: 'mealPlan', items: [] }; // Initialize with empty structure
+        mealplanData = { name: mealplanName, type: 'mealplan', items: [] }; // Initialize with empty structure
     }
     notifyChange();
 }
 
-// --- Centralized mutation helpers --- 
-export function addMealPlanItem(parentPath, item) {
-    let arr = mealPlanData.items;
-    for (let i = 0; i < parentPath.length; i++) {
-        arr = arr[parentPath[i]].items;
-    }
-    arr.push(item);
-    saveMealPlanToFirestore();
+// --- Centralized mutation helpers ---
+
+//CREATE
+export function addMealplanItem(container, item) {
+    container.items.push(item);
+    saveMealplanToFirestore();
     notifyChange();
 }
 
-export function removeMealPlanItem(parentPath, idx) {
-    let arr = mealPlanData.items;
-    for (let i = 0; i < parentPath.length; i++) {
-        arr = arr[parentPath[i]].items;
-    }
-    arr.splice(idx, 1);
-    saveMealPlanToFirestore();
-    notifyChange();
-}
-
-export function updateMealPlanItem(parentPath, idx, newData) {
-    let arr = mealPlanData.items;
-    for (let i = 0; i < parentPath.length; i++) {
-        arr = arr[parentPath[i]].items;
-    }
-    arr[idx] = { ...arr[idx], ...newData };
-}
-
-export function getItemPath(type, name) {
-    //perform a breadth-first search for an item with the given type and name and returns the path as an array of indices
-    function bfs(items, path = []) {
-        const queue = [{ items, path }];
+//READ
+export function getMealplanItem(searchItemType, searchItemName) {
+    function bfs(item) {
+        const queue = [item];
         while (queue.length > 0) {
-            const { items, path } = queue.shift();
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                if (item.type === type && item.name === name) {
-                    return [...path, i];
+            const parentItem = queue.shift();
+            for (let i = 0; i < parentItem.items.length; i++) {
+                const childItem = parentItem.items[i];
+                if (childItem.type === searchItemType && childItem.name === searchItemName) {
+                    return {
+                        item: childItem,
+                        parent: parentItem,
+                        index: i
+                    }
                 }
-                if (item.items) {
-                    queue.push({ items: item.items, path: [...path, i] });
+                if (childItem.items) {
+                    queue.push(childItem);
                 }
             }
         }
-        return null;
+        return {
+            item: null,
+            parent: null,
+            index: null
+        }
     }
-    return bfs(mealPlanData.items);
+    return bfs(getMealplanData());
+}
+
+export function getMealplanItemParent(searchItem) {
+    function bfs(item) {
+        const queue = [item];
+        while (queue.length > 0) {
+            const parentItem = queue.shift();
+            for (let i = 0; i < parentItem.items.length; i++) {
+                const childItem = parentItem.items[i];
+                if (childItem === searchItem) {
+                    return {
+                        parent: parentItem,
+                        index: i
+                    }
+                }
+                if (childItem.items) {
+                    queue.push(childItem);
+                }
+            }
+        }
+        return {
+            parent: null,
+            index: null
+        }
+    }
+    return bfs(getMealplanData());
+}
+
+
+//UPDATE
+export function updateMealplanItem(item, newData) {
+    item = { ...item, ...newData };
+    saveMealplanToFirestore();
+    notifyChange();
+}
+
+//DELETE
+export function removeMealplanItem(item) {
+    let searchResult = getMealplanItemParent(item)
+    searchResult.parent.items.splice(searchResult.index, 1)
+    saveMealplanToFirestore();
+    notifyChange();
 }

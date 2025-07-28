@@ -1,9 +1,9 @@
 import { setMealplanName } from "./dataHandler.js";
-import { renderMealPlan } from "./mealPlaner.js";
+import { renderMealplan } from "./mealPlaner.js";
 import { renderShoppingList } from "./shoppingList.js";
 
 document.getElementById('load-mealplan-btn').addEventListener('click', function () {
-    const mealplanInput = document.getElementById('mealplanname-input').value.trim();
+    const mealplanInput = document.getElementById('mealplan-name-input').value.trim();
     if (!mealplanInput) {
         alert("Mealplan name is required!");
         return;
@@ -28,7 +28,7 @@ function displayContent(mode) {
     if (mode === 'Plan') {
         document.getElementById('shopping-list-section').style.display = 'none';
         document.getElementById("meal-plan-section").style.display = 'block';
-        renderMealPlan();
+        renderMealplan();
     } else if (mode === 'Shop') {
         document.getElementById('meal-plan-section').style.display = 'none';
         document.getElementById('shopping-list-section').style.display = 'block';

@@ -1,4 +1,4 @@
-import { getMealplanData, getAllRecipes, addMealPlanItem, getItemPath, getRecipeByID } from "./dataHandler.js";
+import { getMealplanData, addMealplanItem, getMealplanItem, getRecipeByID } from "./dataHandler.js";
 
 let SortMode = "recipe"; // Default sort mode
 
@@ -14,8 +14,8 @@ export function renderShoppingList(sortMode = SortMode) {
     const shoppingListPage = document.getElementById('shopping-list-container');
     shoppingListPage.innerHTML = ''; // Clear existing content
 
-    /** @type {MealPlan} */
-    const mealPlanData = getMealplanData();
+    /** @type {Mealplan} */
+    const mealplanData = getMealplanData();
 
     // Flatten all recipes from the nested structure
     function flattenRecipes(itemArray) {
@@ -59,7 +59,7 @@ export function renderShoppingList(sortMode = SortMode) {
         return map;
     }
 
-    let recipeIngredientMap = flattenRecipes(mealPlanData.items);
+    let recipeIngredientMap = flattenRecipes(mealplanData.items);
 
     // --- Shopping List Rendering ---
 
@@ -112,15 +112,16 @@ window.addMiscShoppingItem = function () {
     const value = input.value.trim();
     if (!value) return;
 
-    // Add to mealPlanData as an "Other" object in the Miscellaneous meal group
-    let miscItemPath = getItemPath(miscItemGroupType, miscItemGroupName);
+    // Add to mealplanData as an "Other" object in the Miscellaneous meal group
+    let searchResult = getMealplanItem(miscItemGroupType, miscItemGroupName);
+    let miscContainerItem = searchResult.item
 
-    if (!miscItemPath) {
+    if (!miscContainerItem) {
         let miscMealGroup = { type: miscItemGroupType, name: miscItemGroupName, items: [{ type: miscItemType, text: value }] };
-        addMealPlanItem([], miscMealGroup);
+        addMealplanItem([], miscMealGroup);
     }
     else {
-        addMealPlanItem(miscItemPath, { type: miscItemType, text: value });
+        addMealplanItem(miscContainerItem, { type: miscItemType, text: value });
     }
     input.value = ''; // Clear input field
     renderShoppingList();

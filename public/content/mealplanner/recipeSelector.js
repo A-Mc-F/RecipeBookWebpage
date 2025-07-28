@@ -1,10 +1,10 @@
-import { getAllRecipes, addMealPlanItem } from "./dataHandler.js";
+import { getAllRecipes, addMealplanItem } from "./dataHandler.js";
 
 let parentPath = null;
 
 // --- Recipe modal logic ---
-export function openRecipeModal(path) {
-    parentPath = path;
+export function openRecipeModal(object) {
+    parentPath = object;
     document.getElementById('recipe-modal').style.display = 'block';
     const list = document.getElementById('recipe-list-modal');
     list.innerHTML = '';
@@ -12,7 +12,7 @@ export function openRecipeModal(path) {
         const btn = document.createElement('button');
         btn.textContent = r.name;
         btn.onclick = () => {
-            addMealPlanItem(parentPath, { type: 'recipe', recipeId: r.id });
+            addMealplanItem(parentPath, { type: 'recipe', recipeId: r.id });
             closeRecipeModal();
         };
         list.appendChild(btn);
@@ -24,7 +24,7 @@ window.addRandomRecipeToCurrentGroup = function () {
     const usedIds = getMealplanData().flatMap(flattenRecipes);
     const unused = getAllRecipes().filter(r => !usedIds.includes(r.id));
     const pick = unused.length ? unused[Math.floor(Math.random() * unused.length)] : getAllRecipes()[Math.floor(Math.random() * getAllRecipes().length)];
-    addMealPlanItem(parentPath, { type: 'recipe', recipeId: pick.id });
+    addMealplanItem(parentPath, { type: 'recipe', recipeId: pick.id });
     closeRecipeModal();
 }
 

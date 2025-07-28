@@ -1,189 +1,132 @@
-import { getAllRecipes, getMealplanData, setMealPlanChangeListener, addMealPlanItem, removeMealPlanItem, updateMealPlanItem } from "./dataHandler.js";
+import { getAllRecipes, getMealplanData, setMealplanChangeListener, addMealplanItem, removeMealplanItem, updateMealplanItem } from "./dataHandler.js";
 import { openRecipeModal } from "./recipeSelector.js";
 
 
 // --- Render the meal plan recursively ---
-export function renderMealPlan() {
+export function renderMealplan() {
     const html_object = document.getElementById('meal-plan-container');
     html_object.innerHTML = '';
-    const mealplanData = getMealplanData();
-    renderMealPlanContainer(html_object, mealplanData, []);
+    html_object.appendChild(renderMealplanContainer(getMealplanData()));
 };
 
 // Register change listener to auto-render on data change
-setMealPlanChangeListener(renderMealPlan);
+setMealplanChangeListener(renderMealplan);
 
+function renderMealplanContainer(object) {
+    let el = document.createElement('div')
+    el.className = object.type
 
-function renderMealPlanContainer(html_element, container, parentPath = []) {
-    html_element.innerHTML = '';
-
-    if (!container || !container.items || container.items.length === 0) {
-        html_element.appendChild(plusTile(container, parentPath));
-        return; // No items to render
-    }
-
-    container.items.forEach((item, idx) => {
-        const path = parentPath.concat(idx);
-        let el = document.createElement('div');
-        el.className = 'mealplan-item mealplan-' + item.type;
-
-        // Create a flex row container for inline content + remove button
-        const row = document.createElement('div');
-        row.className = 'mealplan-item-row';
-        row.style.display = 'flex';
-        row.style.alignItems = 'center';
-        row.style.gap = '0.5em';
-
-        if (item.type === 'day' || item.type === 'meal' || item.type === 'misc_group') {
-            // Editable name
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = item.name || '';
-            input.placeholder = item.type === 'day' ? 'Day Name' : 'Meal Name';
-            input.className = 'mealplan-group-input';
-            input.oninput = e => {
-                updateMealPlanItem(parentPath, idx, { name: input.value });
-            };
-            row.appendChild(input);
-
-            // Remove button inline
-            const removeBtn = document.createElement('button');
-            removeBtn.innerHTML = '<img src="../../icons/delete.png" alt="Remove">';
-            removeBtn.className = 'icon-button remove-btn';
-            removeBtn.onclick = () => {
-                removeMealPlanItem(parentPath, idx);
-            };
-            row.appendChild(removeBtn);
-
-            el.appendChild(row);
-
-            // Children
-            const childrenDiv = document.createElement('div');
-            childrenDiv.className = 'mealplan-group-children';
-            renderMealPlanContainer(childrenDiv, item, path);
-            el.appendChild(childrenDiv);
-        } else if (item.type === 'recipe') {
-            const recipe = getAllRecipes().find(r => r.id === item.recipeId);
-            const recipeDiv = document.createElement('div');
-            recipeDiv.className = 'mealplan-recipe';
-            recipeDiv.textContent = recipe ? recipe.name : 'Unknown Recipe';
-            row.appendChild(recipeDiv);
-
-            // Remove button inline
-            const removeBtn = document.createElement('button');
-            removeBtn.innerHTML = '<img src="../../icons/delete.png" alt="Remove">';
-            removeBtn.className = 'icon-button remove-btn';
-            removeBtn.onclick = () => {
-                removeMealPlanItem(parentPath, idx);
-            };
-            row.appendChild(removeBtn);
-
-            el.appendChild(row);
-        } else if (item.type === 'other' || item.type === 'misc') {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = item.text || '';
-            input.placeholder = 'Other...';
-            input.className = 'mealplan-other-input';
-            input.oninput = e => {
-                updateMealPlanItem(parentPath, idx, { text: input.value });
-            };
-            row.appendChild(input);
-
-            // Remove button inline
-            const removeBtn = document.createElement('button');
-            removeBtn.innerHTML = '<img src="../../icons/delete.png" alt="Remove">';
-            removeBtn.className = 'icon-button remove-btn';
-            removeBtn.onclick = () => {
-                removeMealPlanItem(parentPath, idx);
-            };
-            row.appendChild(removeBtn);
-
-            el.appendChild(row);
+    if (object.type === 'mealplan') {
+        if (object.items && !(object.items.length === 0)) {
+            object.items.forEach((item) => {
+                el.appendChild(renderMealplanContainer(item));
+            })
         }
+        el.appendChild(plusButton(object))
+        return el
+    }
 
-        html_element.appendChild(el);
-    });
+    else if (object.type === 'day' || object.type === 'meal' || object.type === 'misc_group') {
+        let headingRow = document.createElement('div');
+        headingRow.appendChild(textInput(object));
+        headingRow.appendChild(recipeListButton(object));
+        headingRow.appendChild(removeButton(object));
 
-    html_element.appendChild(plusTile(container, parentPath));
+        el.appendChild(headingRow);
+
+        // Children
+        if (object.items || !(object.items.length === 0)) {
+            object.items.forEach((item) => {
+                el.appendChild(renderMealplanContainer(item));
+            })
+        }
+        el.appendChild(plusButton(object))
+
+        return el
+    }
+
+    else if (object.type === 'recipe') {
+        const recipe = getAllRecipes().find(r => r.id === object.recipeId);
+        const recipeNameDiv = document.createElement('span');
+        recipeNameDiv.textContent = recipe ? recipe.name : 'Unknown Recipe';
+        el.appendChild(recipeNameDiv);
+        el.appendChild(recipeListButton(object))
+        el.appendChild(removeButton(object));
+        return el
+    }
+
+    else if (object.type === 'other' || object.type === 'misc') {
+        el.appendChild(textInput(object));
+        el.appendChild(recipeListButton(object));
+        el.appendChild(removeButton(object));
+        return el
+    }
 }
 
-function plusTile(container, parentPath) {
-    const plusTile = document.createElement('div');
-    plusTile.className = 'mealplan-plus-tile';
-    plusTile.innerHTML = '<img src="../../icons/plus.png" alt="Add">';
-    plusTile.onclick = e => {
-        showAddItemMenu(plusTile, container, parentPath);
+function textInput(object) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = object.name || '';
+    switch (object.type) {
+        case 'day':
+            input.placeholder = "Day Name";
+            break;
+        case 'meal':
+            input.placeholder = "Meal Name";
+            break;
+        case 'other':
+            input.placeholder = "Note / Other...";
+            break;
+    }
+
+    input.className = 'mealplan-input';
+    input.onblur = e => {
+        updateMealplanItem(object, { name: input.value });
     };
-    return plusTile;
+    return input;
 }
 
-// --- Show add-item menu ---
-export function showAddItemMenu(tile, container, parentPath) {
-    closeAddItemListMenu();
-    const menu = document.createElement('div');
-    menu.className = 'add-item-menu';
-
-    // Determine allowed types based on context
-    let allowed = ['day', 'meal', 'recipe', 'other'];
-    if (parentPath.length > 0) {
-        // If inside a day, allow meal, recipe, other
-        if (container.type === 'day') allowed = ['meal', 'recipe', 'other'];
-        // If inside a meal, allow recipe, other
-        if (container.type === 'meal') allowed = ['recipe', 'other'];
-    }
-
-    if (allowed.includes('day')) {
-        const btn = document.createElement('button');
-        btn.textContent = 'Day';
-        btn.onclick = () => {
-            addMealPlanItem(parentPath, { type: 'day', name: '', items: [] });
-        };
-        menu.appendChild(btn);
-    }
-    if (allowed.includes('meal')) {
-        const btn = document.createElement('button');
-        btn.textContent = 'Meal';
-        btn.onclick = () => {
-            addMealPlanItem(parentPath, { type: 'meal', name: '', items: [] });
-        };
-        menu.appendChild(btn);
-    }
-    if (allowed.includes('recipe')) {
-        const btn = document.createElement('button');
-        btn.textContent = 'Recipe';
-        btn.onclick = () => {
-            openRecipeModal(parentPath);
-            closeAddItemListMenu(); // Close menu after opening modal
-        };
-        menu.appendChild(btn);
-    }
-    if (allowed.includes('other')) {
-        const btn = document.createElement('button');
-        btn.textContent = 'Other';
-        btn.onclick = () => {
-            addMealPlanItem(parentPath, { type: 'other', text: '' });
-        };
-        menu.appendChild(btn);
-    }
-
-    tile.appendChild(menu);
-
-    // Close menu on click outside
-    setTimeout(() => {
-        document.addEventListener('click', closeAddItemListMenu, { once: true });
-    }, 10);
-
-    menu.onclick = e => e.stopPropagation();
+function plusButton(object) {
+    const plusBtn = document.createElement('div');
+    plusBtn.className = 'icon-button plus-btn';
+    plusBtn.innerHTML = '<img src="../../icons/plus.png" alt="Add">';
+    plusBtn.onclick = e => {
+        addItem(object);
+    };
+    return plusBtn;
 }
 
-function closeAddItemListMenu() {
-    document.querySelectorAll('.add-item-menu').forEach(m => m.remove());
+function removeButton(object) {
+    const removeBtn = document.createElement('button');
+    removeBtn.innerHTML = '<img src="../../icons/delete.png" alt="Remove">';
+    removeBtn.className = 'icon-button remove-btn';
+    removeBtn.onclick = () => {
+        removeMealplanItem(object);
+    };
+    return removeBtn;
 }
 
-// --- Helper: get item by path ---
-function getItemByPath(arr, path) {
-    let item = arr;
-    for (let idx of path) item = item[idx].items || item[idx];
-    return item;
+function recipeListButton(object) {
+    const recipeBtn = document.createElement('button');
+    recipeBtn.innerHTML = '<img src="../../icons/notebook.png" alt="Recipe">';
+    recipeBtn.className = 'icon-button recipe-btn';
+    recipeBtn.onclick = () => {
+        openRecipeModal(object);
+    }
+    return recipeBtn;
+}
+
+function addItem(object) {
+
+    if (object.type === 'mealplan') {
+        addMealplanItem(object, { type: 'day', name: '', items: [] });
+    }
+
+    else if (object.type === 'day') {
+        addMealplanItem(object, { type: 'meal', name: '', items: [] });
+    }
+
+    else if (object.type === 'meal') {
+        addMealplanItem(object, { type: 'other', recipeId: '', items: [] });
+    }
 }
