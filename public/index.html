@@ -13,24 +13,44 @@
         <h1>Meal Planning App</h1>
     </header>
 
-    <div class="home-tiles">
-        <a href="content/recipebook/index.html" class="home-tile" aria-label="Recipe Book">
-            <div class="home-tile-icon-container">
-                <img src="icons/notebook.png" class="home-tile-icon" alt="Recipe Book">
-                <div class="home-tile-banner">Recipe Book</div>
-            </div>
-        </a>
-        <a href="content/mealplanner/index.html" class="home-tile" aria-label="Meal Planner">
-            <div class="home-tile-icon-container">
-                <img src="icons/meal.png" class="home-tile-icon" alt="Meal Planner">
-                <div class="home-tile-banner">Meal Planner</div>
-            </div>
-        </a>
-        <!-- Add more tiles as needed -->
+    <!-- Stage Slider -->
+    <div class="slider" id="stage-slider">
+        <label>
+            <input type="radio" name="stage" value="Book" checked>
+            <span>Book</span>
+        </label>
+        <label>
+            <input type="radio" name="stage" value="Plan">
+            <span>Plan</span>
+        </label>
+        <label>
+            <input type="radio" name="stage" value="Shop">
+            <span>Shop</span>
+        </label>
     </div>
+
+    <div class="frame">
+        <div class="panels">
+            <div class="pane active" id="Book">
+                <h1>Recipe Book</h1>
+            </div>
+            <div class="pane" id="Plan">
+                <h1>Meal Planner</h1>
+            </div>
+            <div class="pane" id="Shop">
+                <h1>Shopping List</h1>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <a href="https://github.com/A-Mc-F/RecipeBookWebpage/issues">GitHub Project (Post issues here)</a>
     </footer>
+
+
+
+
+    <script type="module" src="main.js"></script>
 </body>
 
 </html>

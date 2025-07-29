@@ -35,12 +35,3 @@ function displayContent(mode) {
         renderShoppingList();
     }
 }
-
-// --- Slider (Radio) Event Listener ---
-const shopRadio = document.querySelectorAll('input[name="sortMode"]');
-shopRadio.forEach(radio => {
-    radio.addEventListener('change', function () {
-        const mode = document.querySelector('input[name="sortMode"]:checked').value;
-        renderShoppingList(mode);
-    });
-});
