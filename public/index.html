@@ -9,48 +9,45 @@
 </head>
 
 <body>
-    <header>
-        <h1>Meal Planning App</h1>
-    </header>
+    <main>
+        <!-- Stage Slider -->
+        <nav class="nav-links" id="stage-slider" tag="selectable">
+            <div id="Book" class="stage-selector active">
+                Cook Book
+            </div>
+            <div id="Plan" class="stage-selector">
+                Meal Plan
+            </div>
+            <div id="Shop" class="stage-selector">
+                Shopping List
+            </div>
+        </nav>
 
-    <!-- Stage Slider -->
-    <div class="slider" id="stage-slider">
-        <label>
-            <input type="radio" name="stage" value="Book" checked>
-            <span>Book</span>
-        </label>
-        <label>
-            <input type="radio" name="stage" value="Plan">
-            <span>Plan</span>
-        </label>
-        <label>
-            <input type="radio" name="stage" value="Shop">
-            <span>Shop</span>
-        </label>
-    </div>
-
-    <div class="frame">
         <div class="panels">
-            <div class="pane active" id="Book">
-                <h1>Recipe Book</h1>
+            <div class="panel glass hero active" id="book-panel">
+                <div class="recipe-list" id="recipe-list"></div>
             </div>
-            <div class="pane" id="Plan">
-                <h1>Meal Planner</h1>
+            <div class="panel glass hero" id="plan-panel">
+                <div class="meal-plan" id="meal-plan"></div>
             </div>
-            <div class="pane" id="Shop">
-                <h1>Shopping List</h1>
+            <div class="panel glass hero" id="shop-panel">
+                <div class="shopping-list" id="shopping-list"></div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <footer>
+    <footer class="footer-links">
         <a href="https://github.com/A-Mc-F/RecipeBookWebpage/issues">GitHub Project (Post issues here)</a>
     </footer>
 
 
 
 
-    <script type="module" src="main.js"></script>
+    <script type="module" src="stageSelection.js"></script>
+
+    <script type="module" src="./src/recipeBook.js"></script>
+    <script type="module" src="./content/mealplanner/mealPlanRenderer.js"></script>
+
 </body>
 
 </html>

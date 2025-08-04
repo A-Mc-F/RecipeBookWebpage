@@ -1,5 +1,5 @@
 import { setMealplanName } from "./dataHandler.js";
-import { renderMealplan } from "./mealPlaner.js";
+import { renderMealplan } from "./mealPlanRenderer.js";
 import { renderShoppingList } from "./shoppingList.js";
 
 document.getElementById('load-mealplan-btn').addEventListener('click', function () {

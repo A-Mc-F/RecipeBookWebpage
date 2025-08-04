@@ -11,7 +11,7 @@ let miscItemType = "misc";
 export function renderShoppingList(sortMode = SortMode) {
     SortMode = sortMode; // Update global sort mode
 
-    const shoppingListPage = document.getElementById('shopping-list-container');
+    const shoppingListPage = document.getElementById('shopping-list');
     shoppingListPage.innerHTML = ''; // Clear existing content
 
     /** @type {Mealplan} */

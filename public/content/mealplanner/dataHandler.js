@@ -1,9 +1,10 @@
+import { collection, doc, setDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+import { database } from "../../src/firestoreConnection.js";
 
 /**
  * @typedef {Object} MealplanItem
  * @property {'day'|'meal'|'recipe'|'other'|'misc_group'|'misc'} type
  * @property {string} [name]         // For 'day', 'meal', 'misc_group'
- * @property {string} [text]         // For 'other', 'misc'
  * @property {string} [recipeId]     // For 'recipe'
  * @property {MealplanItem[]} [items]// For 'day', 'meal', 'misc_group'
  */
@@ -16,26 +17,10 @@
  */
 
 
-
 // --- Meal plan change listener ---
 let onMealplanChange = null;
 export function setMealplanChangeListener(cb) { onMealplanChange = cb; }
 function notifyChange() { if (onMealplanChange) onMealplanChange(mealplanData); }
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
-
-// --- Firebase config ---
-const firebaseConfig = {
-    apiKey: "AIzaSyB7fE3GsZIxyfE7twzsUnycLCk4tx0xzU4",
-    authDomain: "mealplanner-e91be.firebaseapp.com",
-    projectId: "mealplanner-e91be",
-    storageBucket: "mealplanner-e91be.appspot.com",
-    messagingSenderId: "46200749310",
-    appId: "1:46200749310:web:9a99f7d4e6d225ccff39af"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
 
 let allRecipes = [];
 let mealplanData = /** @type { Mealplan } */ ({ name: '', type: 'mealplan', items: [] });
@@ -43,7 +28,7 @@ let mealplanName = null;
 
 // --- Fetch all recipes from Firestore ---
 async function fetchAllRecipes() {
-    const recipesCol = collection(db, 'recipes');
+    const recipesCol = collection(database, 'recipes');
     const recipesSnapshot = await getDocs(recipesCol);
     allRecipes = recipesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
@@ -72,7 +57,7 @@ export function getMealplanData() {
 
 async function saveMealplanToFirestore() {
     if (!mealplanName) return;
-    await setDoc(doc(db, 'mealplans', mealplanName), {
+    await setDoc(doc(database, 'mealplans', mealplanName), {
         mealplan: mealplanData,
         timestamp: new Date()
     });
@@ -80,7 +65,7 @@ async function saveMealplanToFirestore() {
 
 async function loadMealplanFromFirestore() {
     if (!mealplanName) return;
-    const mealplanDoc = await getDoc(doc(db, 'mealplans', mealplanName));
+    const mealplanDoc = await getDoc(doc(database, 'mealplans', mealplanName));
     if (mealplanDoc.exists()) {
         mealplanData = mealplanDoc.data().mealplan;
     } else {
