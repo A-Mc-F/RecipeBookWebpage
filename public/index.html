@@ -9,32 +9,37 @@
 </head>
 
 <body>
-    <main>
-        <!-- Stage Slider -->
-        <nav class="nav-links" id="stage-slider" tag="selectable">
-            <div id="Book" class="stage-selector active">
-                Cook Book
-            </div>
-            <div id="Plan" class="stage-selector">
-                Meal Plan
-            </div>
-            <div id="Shop" class="stage-selector">
-                Shopping List
-            </div>
-        </nav>
+    <!-- Stage Slider -->
+    <nav class="nav-links" id="stage-slider" tag="selectable">
+        <div id="Book" class="stage-selector active">
+            Cook Book
+        </div>
+        <div id="Plan" class="stage-selector">
+            Meal Plan
+        </div>
+        <div id="Shop" class="stage-selector">
+            Shopping List
+        </div>
+    </nav>
 
-        <div class="panels">
-            <div class="panel glass hero active" id="book-panel">
+    <div class="panel-window">
+        <div class="panel-slider">
+            <div class="panel glass hero" id="book-panel">
+                <div class="cta-button">
+                    <span>Add Recipe</span>
+                    <img src="./icons/plus.png" class="icon-button">
+
+                </div>
                 <div class="recipe-list" id="recipe-list"></div>
             </div>
             <div class="panel glass hero" id="plan-panel">
                 <div class="meal-plan" id="meal-plan"></div>
             </div>
             <div class="panel glass hero" id="shop-panel">
-                <div class="shopping-list" id="shopping-list"></div>
+                <div class="shopping-list scrollable-list" id="shopping-list"></div>
             </div>
         </div>
-    </main>
+    </div>
 
     <footer class="footer-links">
         <a href="https://github.com/A-Mc-F/RecipeBookWebpage/issues">GitHub Project (Post issues here)</a>

@@ -3,54 +3,47 @@ import { renderMealplan } from "./content/mealplanner/mealPlanRenderer.js"
 import { renderShoppingList } from "./content/mealplanner/shoppingList.js";
 import { getState, setChangeListener, setState } from "./stateMachine.js";
 
+const stageSelectors = document.querySelectorAll('nav#stage-slider .stage-selector');
+
+const panelsContainer = document.querySelector('.panel-slider');
+const panels = panelsContainer ? Array.from(panelsContainer.children).filter(child => child.tagName === 'DIV') : [];
+
+if (!panelsContainer || panels.length === 0 || stageSelectors.length === 0) {
+    console.error('Slider elements not found.');
+}
+
+// Assume panels are laid out horizontally and have equal width
+// We'll calculate the offset based on the index of the clicked stage selector
+
+
 // --- Slider (Radio) Event Listener ---
 const selectors = document.querySelectorAll('div.stage-selector');
-selectors.forEach(selector => {
-    console.log(`Assigning function to ${selector.id}`)
-    selector.addEventListener('click', function () {
+selectors.forEach((selector, index) => {
+    selector.addEventListener('click', () => {
         setState('stage', selector.id);
+
+        // Remove active class from all stage selectors and add to the clicked one
+        selectors.forEach(sel => sel.classList.remove('active'));
+        selector.classList.add('active');
+
+        // Calculate the translation needed to show the panel at the given index
+        // This assumes each panel takes up the full width of the container
+        // You might need to adjust this calculation based on your CSS
+        const panelWidth = panelsContainer.offsetWidth / panels.length; // Simple assumption
+        console.log(`width ${panelWidth}`)
+        const translation = -index * panelWidth;
+
+        panelsContainer.style.transform = `translateX(${translation}px)`;
+
+        // // Optional: Update active class on panels if needed
+        // panels.forEach(panel => panel.classList.remove('active'));
+        // if (panels[index]) {
+        //     panels[index].classList.add('active');
+        // }
+
+        const stage = getState('stage')
+        console.log(`Changing to ${stage}`)
     });
 });
-
-// --- Display content based on selected mode ---
-export function displayContent() {
-    const stage = getState('stage')
-    console.log(`Changing to ${stage}`)
-    switch (stage) {
-        case 'Book':
-            hidePanels();
-            document.getElementById('book-panel').classList.add('active');
-            document.getElementById('Book').classList.add('active');
-            renderRecipeBook();
-            console.log('Now showing book')
-            break;
-        case 'Plan':
-            hidePanels();
-            document.getElementById('plan-panel').classList.add('active');
-            document.getElementById('Plan').classList.add('active');
-            renderMealplan();
-            console.log('Now showing plan')
-            break;
-        case 'Shop':
-            hidePanels();
-            document.getElementById('shop-panel').classList.add('active');
-            document.getElementById('Shop').classList.add('active');
-            renderShoppingList();
-            console.log('Now showing shop')
-            break;
-    }
-}
-
-setChangeListener('stage', displayContent)
-
-function hidePanels() {
-    document.getElementById('book-panel').classList.remove('active');
-    document.getElementById('plan-panel').classList.remove('active');
-    document.getElementById('shop-panel').classList.remove('active');
-
-    document.getElementById('Book').classList.remove('active');
-    document.getElementById('Plan').classList.remove('active');
-    document.getElementById('Shop').classList.remove('active');
-}
 
 setState('stage', 'Book')
