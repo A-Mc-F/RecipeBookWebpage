@@ -80,12 +80,9 @@ main {
 }
 
 .scrollable-list {
-    max-height: 80%;
-    /* Limit to 6 items */
+    height: 100%;
     width: 100%;
     overflow-y: auto;
-    /* Add vertical scrollbar */
-    /* justify-content: center; */
     scrollbar-width: none;
 }
 
