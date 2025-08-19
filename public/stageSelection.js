@@ -1,7 +1,4 @@
-import { renderRecipeBook } from "./src/recipeBook.js";
-import { renderMealplan } from "./content/mealplanner/mealPlanRenderer.js"
-import { renderShoppingList } from "./content/mealplanner/shoppingList.js";
-import { getState, setChangeListener, setState } from "./stateMachine.js";
+import { getState, setState } from "./stateMachine.js";
 
 const stageSelectors = document.querySelectorAll('nav#stage-slider .stage-selector');
 
@@ -34,12 +31,6 @@ selectors.forEach((selector, index) => {
         const translation = -index * panelWidth;
 
         panelsContainer.style.transform = `translateX(${translation}px)`;
-
-        // // Optional: Update active class on panels if needed
-        // panels.forEach(panel => panel.classList.remove('active'));
-        // if (panels[index]) {
-        //     panels[index].classList.add('active');
-        // }
 
         const stage = getState('stage')
         console.log(`Changing to ${stage}`)
