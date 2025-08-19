@@ -1,10 +1,13 @@
-import { getState, setState } from "../stateMachine.js";
+import { getState, setChangeListener } from "../stateMachine.js";
 import { getAllRecipes } from "./recipesFirestore.js"
-import { addMealplanItem } from "../content/mealplanner/dataHandler.js";
 import { recipeCard } from "./recipeRenderer.js";
 
 // --- Render the meal plan recursively ---
 export function renderRecipeBook() {
+    if (getState('stage') !== 'Book') {
+        return
+    }
+    console.log('rendering Recipe book')
     const html_object = document.getElementById('recipe-list');
     html_object.innerHTML = '';
     const recipes = getAllRecipes();
@@ -20,4 +23,6 @@ export function renderRecipeBook() {
     })
 };
 
-renderRecipeBook();
+renderRecipeBook()
+
+setChangeListener('stage', renderRecipeBook)

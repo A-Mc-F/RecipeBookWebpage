@@ -1,10 +1,13 @@
 import { recipeCard } from "../../src/recipeRenderer.js";
-import { getState, setState } from "../../stateMachine.js";
+import { getState, setChangeListener, setState } from "../../stateMachine.js";
 import { getAllRecipes, getMealplanData, setMealplanChangeListener, addMealplanItem, removeMealplanItem, updateMealplanItem } from "./dataHandler.js";
-//import { openRecipeModal } from "./recipeSelector.js";
 
 // --- Render the meal plan recursively ---
 export function renderMealplan() {
+    if (getState('stage') !== 'Plan') {
+        return
+    }
+    console.log('rendering Mealplan')
     const html_object = document.getElementById('meal-plan');
     html_object.innerHTML = '';
     html_object.appendChild(renderMealplanContainer(getMealplanData()));
@@ -240,3 +243,7 @@ function addItem(object) {
             break;
     }
 }
+
+setChangeListener('stage', renderMealplan)
+
+renderMealplan()

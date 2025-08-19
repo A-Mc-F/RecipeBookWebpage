@@ -1,3 +1,4 @@
+import { getState, setChangeListener } from "../../stateMachine.js";
 import { getMealplanData, addMealplanItem, getMealplanItem, getRecipeByID } from "./dataHandler.js";
 
 let SortMode = "recipe"; // Default sort mode
@@ -9,6 +10,11 @@ let miscItemType = "misc";
 
 // --- Shopping List Logic ---
 export function renderShoppingList(sortMode = SortMode) {
+    if (getState('stage') !== 'Shop') {
+        return
+    }
+    console.log('rendering Shopping list')
+
     SortMode = sortMode; // Update global sort mode
 
     const shoppingListPage = document.getElementById('shopping-list');
@@ -138,3 +144,8 @@ function toggleStrikethrough(element) {
         element.parentElement.appendChild(element);
     }
 }
+
+
+setChangeListener('stage', renderShoppingList)
+
+renderShoppingList()
