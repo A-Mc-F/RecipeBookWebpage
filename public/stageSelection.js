@@ -27,13 +27,12 @@ selectors.forEach((selector, index) => {
         // This assumes each panel takes up the full width of the container
         // You might need to adjust this calculation based on your CSS
         const panelWidth = panelsContainer.offsetWidth / panels.length; // Simple assumption
-        console.log(`width ${panelWidth}`)
         const translation = -index * panelWidth;
 
         panelsContainer.style.transform = `translateX(${translation}px)`;
 
         const stage = getState('stage')
-        console.log(`Changing to ${stage}`)
+        console.log(`Changed to ${stage}`)
     });
 });
 
