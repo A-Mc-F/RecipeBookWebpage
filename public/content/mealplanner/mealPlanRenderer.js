@@ -56,9 +56,6 @@ function renderMealplanContainer(object) {
                 let objectName = document.createElement('h5');
                 objectName.innerText = object.name;
                 headingRow.appendChild(objectName);
-                // headingRow.appendChild(spacer)
-                // headingRow.appendChild(recipeListButton(object));
-                // headingRow.appendChild(removeButton(object));
 
                 el.appendChild(headingRow);
 
@@ -138,8 +135,6 @@ function renderMealplanContainer(object) {
             {
                 const recipe = getAllRecipes().find(r => r.id === object.recipeId);
                 el.appendChild(recipeCard(recipe));
-                el.appendChild(removeButton(object));
-                console.log(`tried adding recipe ${recipe.name}`)
                 return el
             }
         case 'other':
