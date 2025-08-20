@@ -1,4 +1,4 @@
-import { getState, setChangeListener } from "../stateMachine.js";
+import { getState, setChangeListener } from "./stateMachine.js";
 import { getAllRecipes } from "./recipesFirestore.js"
 import { recipeCard } from "./recipeRenderer.js";
 

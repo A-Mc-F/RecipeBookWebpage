@@ -1,5 +1,5 @@
 import { collection, doc, setDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
-import { database } from "../../src/firestoreConnection.js";
+import { database } from "./firestoreConnection.js";
 
 /**
  * @typedef {Object} MealplanItem

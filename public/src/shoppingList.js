@@ -1,4 +1,4 @@
-import { getState, setChangeListener } from "../../stateMachine.js";
+import { getState, setChangeListener } from "./stateMachine.js";
 import { getMealplanData, addMealplanItem, getMealplanItem, getRecipeByID } from "./dataHandler.js";
 
 let SortMode = "recipe"; // Default sort mode

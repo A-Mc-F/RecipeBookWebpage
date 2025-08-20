@@ -1,5 +1,5 @@
-import { recipeCard } from "../../src/recipeRenderer.js";
-import { getState, setChangeListener, setState } from "../../stateMachine.js";
+import { recipeCard } from "./recipeRenderer.js";
+import { getState, setChangeListener, setState } from "./stateMachine.js";
 import { getAllRecipes, getMealplanData, setMealplanChangeListener, addMealplanItem, removeMealplanItem, updateMealplanItem } from "./dataHandler.js";
 
 // --- Render the meal plan recursively ---

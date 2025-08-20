@@ -1,5 +1,5 @@
-import { setState, getState } from "../stateMachine.js";
-import { addMealplanItem } from "../content/mealplanner/dataHandler.js";
+import { setState, getState } from "./stateMachine.js";
+import { addMealplanItem } from "./dataHandler.js";
 
 export function recipeCard(recipe) {
     let card = document.createElement('div');
