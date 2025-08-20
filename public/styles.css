@@ -188,6 +188,7 @@ nav {
     display: flex;
     gap: 30px;
     flex-direction: row;
+    justify-content: center;
 }
 
 .nav-links div {
