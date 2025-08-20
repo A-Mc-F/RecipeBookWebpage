@@ -1,7 +1,7 @@
 import { getState, setChangeListener } from "./stateMachine.js";
 import { getMealplanData, addMealplanItem, getMealplanItem, getRecipeByID } from "./dataHandler.js";
 
-let SortMode = "recipe"; // Default sort mode
+let SortMode = "alpha"; // Default sort mode
 
 let miscItemGroupName = "Miscellaneous";
 let miscItemGroupType = "misc_group"; // Type for the Miscellaneous group
