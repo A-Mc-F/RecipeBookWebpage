@@ -1,5 +1,6 @@
-import { getState, setChangeListener } from "./stateMachine.js";
+import { getState, setState, setChangeListener } from "./stateMachine.js";
 import { getAllRecipes } from "./recipesFirestore.js"
+import { addMealplanItem } from "./dataHandler.js";
 import { recipeCard } from "./recipeRenderer.js";
 
 // --- Render the meal plan recursively ---
@@ -19,7 +20,16 @@ export function renderRecipeBook() {
     });
 
     recipes.forEach((recipe) => {
-        html_object.appendChild(recipeCard(recipe))
+        let recipePill = recipeCard(recipe.name)
+        recipePill.onclick = e => {
+            setState('recipe', recipe)
+            if (getState('group') !== null) {
+                let recipeObj = { type: 'recipe', name: getState('recipe').name, recipeId: getState('recipe').id }
+                addMealplanItem(getState('group'), recipeObj)
+                console.log(`added ${recipeObj.name} to meal plan`)
+            }
+        }
+        html_object.appendChild(recipePill)
     })
 };
 

@@ -134,7 +134,12 @@ function renderMealplanContainer(object) {
         case 'recipe':
             {
                 const recipe = getAllRecipes().find(r => r.id === object.recipeId);
-                el.appendChild(recipeCard(recipe));
+                let recipePill = recipeCard(recipe.name)
+                recipePill.onclick = e => {
+                    removeMealplanItem(object)
+                    console.log('removed recipe from plan')
+                }
+                el.appendChild(recipePill);
                 return el
             }
         case 'other':
