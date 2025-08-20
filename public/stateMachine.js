@@ -16,8 +16,8 @@ export function setChangeListener(state, listener) {
 }
 
 function notifyChange(state) {
-    console.log(`Notifying of ${state} change`)
-    listeners[state].forEach(listener => listener(states[state]))
+    console.log(`Notifying of ${state} change to ${states[state]}`)
+    listeners[state].forEach(listener => listener())
 }
 
 
