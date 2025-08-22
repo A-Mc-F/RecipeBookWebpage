@@ -52,7 +52,5 @@ export function clearState(state) {
 }
 
 export function clearSelections() {
-    console.log('cleared all selections')
-    clearState('group');
     clearState('recipe');
 }
