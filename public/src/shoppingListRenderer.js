@@ -136,11 +136,14 @@ window.addMiscShoppingItem = function () {
 
 // Strikethrough per ingredient (per recipe group)
 function toggleStrikethrough(element) {
-    if (element.style.textDecoration === 'line-through') {
+    let decoration = 'line-through'
+    if (element.style.textDecoration === decoration) {
         element.style.textDecoration = 'none';
+        element.style.color = 'none';
         element.parentElement.insertBefore(element, element.parentElement.firstChild);
     } else {
-        element.style.textDecoration = 'line-through';
+        element.style.textDecoration = decoration;
+        element.style.color = 'silver';
         element.parentElement.appendChild(element);
     }
 }
