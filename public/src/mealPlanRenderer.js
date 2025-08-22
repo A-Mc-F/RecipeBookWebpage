@@ -1,4 +1,4 @@
-import { recipeCard } from "./recipeRenderer.js";
+import { recipeCard } from "./recipeCard.js";
 import { getState, setChangeListener, setState } from "./stateMachine.js";
 import { getAllRecipes, getMealplanData, setMealplanChangeListener, addMealplanItem, removeMealplanItem, updateMealplanItem } from "./dataHandler.js";
 
