@@ -1,6 +1,5 @@
 import { getState, setState, setChangeListener } from "./stateMachine.js";
-import { getAllRecipes } from "./recipesFirestore.js"
-import { addMealplanItem } from "./dataHandler.js";
+import { addMealplanItem, getAllRecipes } from "./dataHandler.js";
 import { recipeCard } from "./recipeCard.js";
 
 // --- Render the meal plan recursively ---
