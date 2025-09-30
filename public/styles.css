@@ -736,3 +736,42 @@ div#shopping-list {
         font-size: 22px;
     }
 }
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    width: 100vw;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: auto;
+    max-width: 80%;
+    height: auto;
+    max-height: 80%;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 12px;
+    padding: 2em;
+    max-width: 400px;
+    margin: 2em auto;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.18);
+}
+
+.modal-content iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}

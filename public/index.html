@@ -25,7 +25,7 @@
     <div class="panel-window">
         <div class="panel-slider">
             <div class="panel glass hero" id="book-panel">
-                <div class="cta-button">
+                <div class="cta-button" id="new-recipe-btn">
                     <span>Create Recipe</span>
                     <img src="./icons/plus.png" class="icon-button">
                 </div>
@@ -47,6 +47,24 @@
     <footer class="footer-links">
         <a href="https://github.com/A-Mc-F/RecipeBookWebpage/issues">GitHub Project (Post issues here)</a>
     </footer>
+
+    <div class="modal" id="recipe-form">
+        <div class="panel glass hero">
+            <button class="close-modal" aria-label="Close"
+                style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;">&#10005;</button>
+            <form style="display:flex;flex-direction:column;gap:1rem;">
+                <label for="recipe-name">Name:</label>
+                <input type="text" id="recipe-name" name="recipe-name">
+                <label for="recipe-ingredients">Ingredients:</label>
+                <textarea id="recipe-ingredients" name="recipe-ingredients"></textarea>
+                <label for="recipe-instructions">Instructions:</label>
+                <textarea id="recipe-instructions" name="recipe-instructions"></textarea>
+                <div class="cta-button" id="done-btn">
+                    <span>Done</span>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script type="module" src="main.js"></script>
 
