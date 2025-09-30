@@ -1,5 +1,23 @@
-import { collection, doc, setDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
-import { database } from "./firestoreConnection.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyB7fE3GsZIxyfE7twzsUnycLCk4tx0xzU4",
+    authDomain: "mealplanner-e91be.firebaseapp.com",
+    projectId: "mealplanner-e91be",
+    storageBucket: "mealplanner-e91be.firebasestorage.app",
+    messagingSenderId: "46200749310",
+    appId: "1:46200749310:web:9a99f7d4e6d225ccff39af"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getFirestore(app);
+
+
+
+
+
+import { collection, doc, setDoc, getDocs, getDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
 /**
  * @typedef {Object} MealplanItem
@@ -27,7 +45,7 @@ let mealplanData = /** @type { Mealplan } */ ({ name: '', type: 'mealplan', item
 let mealplanName = null;
 
 // --- Fetch all recipes from Firestore ---
-async function fetchAllRecipes() {
+export async function fetchAllRecipes() {
     const recipesCol = collection(database, 'recipes');
     const recipesSnapshot = await getDocs(recipesCol);
     allRecipes = recipesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -41,6 +59,24 @@ export function getAllRecipes() {
 export function getRecipeByID(id) {
     return allRecipes.find(recipe => recipe.id === id);
 }
+
+export function addRecipe(recipe) {
+    const recipesCol = collection(database, 'recipes');
+    return addDoc(recipesCol, recipe);
+}
+
+export function updateRecipe(id, updatedData) {
+    const recipeDoc = doc(database, 'recipes', id);
+    return setDoc(recipeDoc, updatedData, { merge: true });
+}
+
+export function deleteRecipe(id) {
+    const recipeDoc = doc(database, 'recipes', id);
+    return deleteDoc(recipeDoc);
+}
+
+
+
 
 export function getMealplanName() {
     return mealplanName;
