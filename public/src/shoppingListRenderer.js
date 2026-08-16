@@ -70,6 +70,17 @@ export function renderShoppingList(sortMode = SortMode) {
 
     let recipeIngredientMap = flattenRecipes(mealplanData.items);
 
+    // If there are no ingredients, show a clear placeholder and stop
+    if (!recipeIngredientMap || recipeIngredientMap.length === 0) {
+        const emptyMsg = document.createElement('p');
+        emptyMsg.style.color = 'rgba(255,255,255,0.8)';
+        emptyMsg.style.padding = '12px';
+        emptyMsg.style.textAlign = 'center';
+        emptyMsg.textContent = 'No shopping items';
+        shoppingListPage.appendChild(emptyMsg);
+        return;
+    }
+
     // --- Shopping List Rendering ---
 
     if (SortMode === "recipe") {

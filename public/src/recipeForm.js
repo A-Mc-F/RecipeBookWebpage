@@ -95,6 +95,8 @@ function parseRecipeFromHtml(htmlText) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlText, 'text/html');
 
+
+
     // Try JSON-LD first (structured data)
     const ldScripts = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'));
     for (const s of ldScripts) {
