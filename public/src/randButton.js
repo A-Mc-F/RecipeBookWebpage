@@ -38,7 +38,7 @@ function showChoices(options) {
         const title = document.createElement('h3');
         title.textContent = opt.name || 'Unnamed Recipe';
         const desc = document.createElement('p');
-        desc.textContent = opt.description || (opt.ingredients ? opt.ingredients.slice(0,3).join(', ') : '');
+        desc.textContent = opt.description || (opt.ingredients ? opt.ingredients.slice(0, 3).join(', ') : '');
         const chooseBtn = document.createElement('button');
         chooseBtn.className = 'choose';
         chooseBtn.textContent = 'Choose';
