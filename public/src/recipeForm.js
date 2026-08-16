@@ -127,6 +127,23 @@ function parseRecipeFromHtml(htmlText) {
         }
     }
 
+    // WP Recipe Maker specific: prefer wprm structured DOM when present
+    try {
+        const wprmIngEl = doc.querySelector('.wprm-recipe-ingredients');
+        if (wprmIngEl) {
+            const ingredients = Array.from(wprmIngEl.querySelectorAll('li')).map(li => li.textContent.trim()).filter(Boolean);
+            const wprmInstEl = doc.querySelector('.wprm-recipe-instructions') || doc.querySelector('.wprm-recipe-instructions-wrapper');
+            let instructions = [];
+            if (wprmInstEl) {
+                instructions = Array.from(wprmInstEl.querySelectorAll('li, p')).map(el => el.textContent.trim()).filter(Boolean);
+            }
+            const name = (doc.querySelector('.wprm-recipe-name') || doc.querySelector('h1') || doc.querySelector('title'))?.textContent?.trim() || '';
+            return { name, ingredients, instructions };
+        }
+    } catch (e) {
+        // ignore WPRM-specific extraction errors and continue
+    }
+
     // Helper: find section by heading text and collect following list/paragraph items
     function collectSectionByHeading(regex) {
         const headings = Array.from(doc.querySelectorAll('h1,h2,h3,h4,h5'));
