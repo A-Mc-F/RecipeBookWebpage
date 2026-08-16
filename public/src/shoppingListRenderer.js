@@ -1,5 +1,5 @@
 import { getState, setChangeListener } from "./stateMachine.js";
-import { getMealplanData, addMealplanItem, getMealplanItem, getRecipeByID, getShoppingChecks, updateShoppingCheck } from "./dataHandler.js";
+import { getMealplanData, addMealplanItem, getMealplanItem, getRecipeByID, getShoppingChecks, updateShoppingCheck, setMealplanChangeListener } from "./dataHandler.js";
 
 let SortMode = "alpha"; // Default sort mode
 
@@ -246,9 +246,11 @@ function addCopyButton(container) {
 // The Apple Notes-specific clipboard function was removed — use plain clipboard copy only.
 
 async function copyToClipboardPlain() {
+    // Format lines as "- [ ] Item" or "- [x] Item" so Apple Notes recognizes checklists
     const plain = Array.from(document.querySelectorAll('.shopping-item label')).map(l => {
-        const chk = l.previousSibling && l.previousSibling.checked ? '[x]' : '[ ]';
-        return `${chk} ${l.textContent}`;
+        const checked = l.previousSibling && l.previousSibling.checked;
+        const chk = checked ? '[x]' : '[ ]';
+        return `- ${chk} ${l.textContent}`;
     }).join('\n');
 
     try {
@@ -269,5 +271,8 @@ async function copyToClipboardPlain() {
 
 
 setChangeListener('stage', renderShoppingList)
+
+// Re-render shopping list when the shared mealplan or checks change
+setMealplanChangeListener(renderShoppingList)
 
 renderShoppingList()

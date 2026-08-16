@@ -868,3 +868,31 @@ div#shopping-list {
     font-weight: 600;
     font-size: 1rem;
 }
+
+/* Mobile tweaks for the add-recipe modal and form */
+@media (max-width: 480px) {
+    #recipe-form .panel {
+        width: calc(100% - 24px);
+        max-width: calc(100% - 24px);
+        margin: 12px;
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    #recipe-form form {
+        gap: 0.5rem;
+    }
+
+    #recipe-form input,
+    #recipe-form textarea,
+    #recipe-form .cta-button {
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    /* Reduce modal overlay vertical centering to avoid cutoff on small screens */
+    .modal {
+        align-items: flex-start;
+        padding-top: 24px;
+    }
+}

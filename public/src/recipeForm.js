@@ -92,11 +92,10 @@ function parseRecipeFromHtml(htmlText) {
     if (!/<html/i.test(htmlText) && /Title:\s*/i.test(htmlText)) {
         return parseRecipeFromText(htmlText);
     }
-
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlText, 'text/html');
 
-    // Try JSON-LD first
+    // Try JSON-LD first (structured data)
     const ldScripts = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'));
     for (const s of ldScripts) {
         try {
@@ -128,12 +127,74 @@ function parseRecipeFromHtml(htmlText) {
         }
     }
 
-    // Fallback: look for typical selectors
+    // Helper: find section by heading text and collect following list/paragraph items
+    function collectSectionByHeading(regex) {
+        const headings = Array.from(doc.querySelectorAll('h1,h2,h3,h4,h5'));
+        for (const h of headings) {
+            if (regex.test(h.textContent || '')) {
+                // Prefer a following UL/OL
+                let el = h.nextElementSibling;
+                const items = [];
+                const seen = new Set();
+                while (el && !/^H[1-5]$/i.test(el.tagName)) {
+                    if (el.tagName.toLowerCase() === 'ul' || el.tagName.toLowerCase() === 'ol') {
+                        for (const li of Array.from(el.querySelectorAll('li'))) {
+                            const txt = li.textContent.trim();
+                            if (txt && !seen.has(txt)) { items.push(txt); seen.add(txt); }
+                        }
+                        if (items.length) return items;
+                    }
+                    // Sometimes ingredients are in multiple <p> tags or <div> with bullets
+                    if (el.tagName.toLowerCase() === 'p') {
+                        const txt = el.textContent.trim();
+                        if (txt && !seen.has(txt)) { items.push(txt); seen.add(txt); }
+                    }
+                    // If element contains list-like children
+                    const nestedLis = el.querySelectorAll && el.querySelectorAll('li');
+                    if (nestedLis && nestedLis.length) {
+                        for (const li of Array.from(nestedLis)) {
+                            const txt = li.textContent.trim();
+                            if (txt && !seen.has(txt)) { items.push(txt); seen.add(txt); }
+                        }
+                        if (items.length) return items;
+                    }
+                    el = el.nextElementSibling;
+                }
+            }
+        }
+        return null;
+    }
+
+    // Try targeted heading-based extraction first
+    let ingredients = collectSectionByHeading(/ingredient/i) || [];
+    let instructions = collectSectionByHeading(/instruction|direction|method|prepar|step|how to/i) || [];
+
+    // Fallbacks: itemprop or class-based selectors
+    if (ingredients.length === 0) {
+        const ingredientEls = doc.querySelectorAll('[class*=ingredient], [itemprop*=ingredient]');
+        for (const el of ingredientEls) {
+            const txt = el.textContent.trim();
+            if (txt && !ingredients.includes(txt)) ingredients.push(txt);
+        }
+    }
+    if (instructions.length === 0) {
+        const instrEls = doc.querySelectorAll('[class*=instruction], [itemprop*=recipeInstructions], .steps, .method');
+        for (const el of instrEls) {
+            const txt = el.textContent.trim();
+            if (txt && !instructions.includes(txt)) instructions.push(txt);
+        }
+    }
+
+    // Broad fallback: avoid grabbing every <li> on the page; only use li if it appears under a container with "recipe" or "ingredient" in class or within a <article>
+    if (ingredients.length === 0) {
+        const candidateLis = Array.from(doc.querySelectorAll('article li, [class*=recipe] li, [class*=ingredient] li'));
+        for (const li of candidateLis) {
+            const txt = li.textContent.trim();
+            if (txt && !ingredients.includes(txt)) ingredients.push(txt);
+        }
+    }
+
     const title = (doc.querySelector('h1') || doc.querySelector('title'))?.textContent?.trim() || '';
-    const ingredientEls = doc.querySelectorAll('[class*=ingredient], [itemprop*=ingredient], li');
-    const ingredients = Array.from(ingredientEls).map(el => el.textContent.trim()).filter(Boolean);
-    const instrEls = doc.querySelectorAll('[class*=instruction], [itemprop*=recipeInstructions], .steps, .method, p');
-    const instructions = Array.from(instrEls).map(el => el.textContent.trim()).filter(Boolean).slice(0, 30);
 
     if (!title && ingredients.length === 0 && instructions.length === 0) return null;
     return { name: title, ingredients, instructions };
