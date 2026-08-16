@@ -18,13 +18,16 @@ export function renderShoppingList(sortMode = SortMode) {
     SortMode = sortMode; // Update global sort mode
 
     const shoppingListPage = document.getElementById('shopping-list');
+    if (!shoppingListPage) return;
     shoppingListPage.innerHTML = ''; // Clear existing content
 
     // Load persisted checkbox state (shared via mealplan when joined)
     const persistedChecks = getShoppingChecks() || {};
 
     /** @type {Mealplan} */
-    const mealplanData = getMealplanData();
+    const mealplanData = getMealplanData() || { name: '', type: 'mealplan', items: [] };
+
+    const isMealplanLoaded = mealplanData && Array.isArray(mealplanData.items);
 
     // Flatten all recipes from the nested structure
     function flattenRecipes(itemArray) {
@@ -68,9 +71,14 @@ export function renderShoppingList(sortMode = SortMode) {
         return map;
     }
 
-    let recipeIngredientMap = flattenRecipes(mealplanData.items);
+    let recipeIngredientMap = flattenRecipes(isMealplanLoaded ? mealplanData.items : []);
 
-    // If there are no ingredients, show a clear placeholder and stop
+    // If there are no ingredients, show a clear placeholder and stop.
+    // If a plan is still loading, avoid flashing a false empty state by keeping the page blank.
+    if (!isMealplanLoaded) {
+        return;
+    }
+
     if (!recipeIngredientMap || recipeIngredientMap.length === 0) {
         const emptyMsg = document.createElement('p');
         emptyMsg.style.color = 'rgba(255,255,255,0.8)';

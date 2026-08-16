@@ -49,38 +49,108 @@ async function fetchHtmlThroughProxy(url) {
     throw lastErr || new Error('All proxies failed');
 }
 
-function parseRecipeFromHtml(htmlText) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlText, 'text/html');
+function findRecipeObject(value) {
+    if (!value || typeof value !== 'object') return null;
 
-    const wprmIngredientEls = Array.from(
-        doc.querySelectorAll('ul[class^="wprm"], ul[class*=" wprm"], li.wprm-recipe-ingredient')
-    ).filter((el) => {
-        const className = el.className || '';
-        return typeof className === 'string' && className.includes('wprm');
-    });
-
-    const ingredients = wprmIngredientEls
-        .map((ingredientEl) => {
-            const amount = ingredientEl.querySelector('.wprm-recipe-ingredient-amount')?.textContent?.trim();
-            const name = ingredientEl.querySelector('.wprm-recipe-ingredient-name')?.textContent?.trim();
-            return [amount, name].filter(Boolean).join(' ') || null;
-        })
-        .filter(Boolean);
-
-    const instructions = Array.from(
-        doc.querySelectorAll('.wprm-recipe-instruction-text, .wprm-recipe-instructions li, .wprm-recipe-instructions p')
-    )
-        .map((el) => el.textContent.trim())
-        .filter(Boolean);
-
-    const name = doc.querySelector('.wprm-recipe-name')?.textContent?.trim() || '';
-
-    if (!ingredients.length && !name && instructions.length === 0) {
+    if (Array.isArray(value)) {
+        for (const item of value) {
+            const match = findRecipeObject(item);
+            if (match) return match;
+        }
         return null;
     }
 
-    return { name, ingredients, instructions };
+    if (value['@type'] === 'Recipe') {
+        return value;
+    }
+
+    if (Array.isArray(value['@graph'])) {
+        for (const item of value['@graph']) {
+            const match = findRecipeObject(item);
+            if (match) return match;
+        }
+    }
+
+    return null;
+}
+
+function normalizeIngredient(item) {
+    if (typeof item !== 'string') {
+        item = item && typeof item === 'object' ? (item.text || item.name || '') : '';
+    }
+
+    let clean = String(item).replace(/\s+/g, ' ').trim();
+    if (!clean) return '';
+
+    clean = clean.replace(/^(?:-\s*|\*\s*|•\s*)/g, '');
+    clean = clean.replace(/\s*[,;]\s*(?=(?:\d|[A-Za-z]))/g, ', ');
+    clean = clean.replace(/\s*\(.*?\)\s*/g, ' ').trim();
+
+    if (clean.length > 80) clean = clean.slice(0, 80).trim();
+
+    // Split obvious multi-ingredient strings like "1 onion, 2 carrots, 1 tsp salt" into separate entries.
+    const splitCandidates = clean.split(/\s*,\s*(?=(?:\d+\s+|\d+\.?\d*\s*|[A-Za-z]))/);
+    const parts = splitCandidates
+        .map(part => part.replace(/\s+/g, ' ').trim())
+        .filter(part => part && part.length > 1);
+
+    return parts.length > 1 ? parts : [clean].filter(Boolean);
+}
+
+function normalizeInstructions(value) {
+    if (!value) return [];
+
+    if (Array.isArray(value)) {
+        return value
+            .map((item) => {
+                if (typeof item === 'string') return item.trim();
+                if (item && typeof item === 'object') {
+                    if (typeof item.text === 'string') return item.text.trim();
+                    if (typeof item.name === 'string') return item.name.trim();
+                }
+                return '';
+            })
+            .filter(Boolean)
+            .map((text) => text.replace(/\s+/g, ' ').trim())
+            .filter((text) => text.length > 0);
+    }
+
+    if (typeof value === 'string') return [value.replace(/\s+/g, ' ').trim()].filter(Boolean);
+
+    if (typeof value === 'object') {
+        if (typeof value.text === 'string') return [value.text.replace(/\s+/g, ' ').trim()].filter(Boolean);
+        if (typeof value.name === 'string') return [value.name.replace(/\s+/g, ' ').trim()].filter(Boolean);
+    }
+
+    return [];
+}
+
+function parseRecipeFromHtml(htmlText) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+    const jsonLdScripts = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'));
+
+    for (const script of jsonLdScripts) {
+        try {
+            const parsedJson = JSON.parse(script.textContent || '');
+            const recipe = findRecipeObject(parsedJson);
+            if (!recipe) continue;
+
+            const name = typeof recipe.name === 'string' ? recipe.name.trim() : '';
+            const ingredientList = Array.isArray(recipe.recipeIngredient)
+                ? recipe.recipeIngredient.flatMap((item) => normalizeIngredient(item))
+                : [];
+            const instructions = normalizeInstructions(recipe.recipeInstructions);
+
+            if (!name && ingredientList.length === 0 && instructions.length === 0) continue;
+
+            return { name, ingredients: ingredientList, instructions };
+        } catch (e) {
+            // Ignore malformed JSON-LD blocks and continue to the next script.
+        }
+    }
+
+    return null;
 }
 
 async function importRecipeFromUrl(url) {

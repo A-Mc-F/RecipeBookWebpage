@@ -117,13 +117,15 @@ export function setMealplanName(name) {
     // opening the same "codeword" (document id) see live updates.
     const mealplanDocRef = doc(database, 'mealplans', mealplanName);
     mealplanUnsubscribe = onSnapshot(mealplanDocRef, (snapshot) => {
+        const previousMealplan = mealplanData && typeof mealplanData === 'object' ? mealplanData : null;
+
         if (snapshot.exists()) {
             const data = snapshot.data();
-            shoppingChecks = data && data.checks ? data.checks : {};
+            shoppingChecks = data && data.checks ? data.checks : (previousMealplan ? shoppingChecks : {});
 
             if (data && data.mealplan && typeof data.mealplan === 'object') {
                 mealplanData = data.mealplan;
-            } else if (!mealplanData || !Array.isArray(mealplanData.items)) {
+            } else if (!previousMealplan || !Array.isArray(previousMealplan.items)) {
                 mealplanData = { name: mealplanName, type: 'mealplan', items: [] };
             }
         } else {
@@ -171,14 +173,10 @@ export async function updateShoppingCheck(key, value) {
 
     const ref = doc(database, 'mealplans', mealplanName);
     try {
-        await updateDoc(ref, { mealplan: mealplanPayload, checks: shoppingChecks, timestamp: new Date() });
-    } catch (err) {
-        // If update fails (document may not exist), create it with mealplan and checks
-        try {
-            await setDoc(ref, { mealplan: mealplanPayload, checks: shoppingChecks, timestamp: new Date() }, { merge: true });
-        } catch (e) {
-            console.error('Failed to persist shopping checks:', e);
-        }
+        const payload = { mealplan: mealplanPayload, checks: shoppingChecks, timestamp: new Date() };
+        await setDoc(ref, payload, { merge: true });
+    } catch (e) {
+        console.error('Failed to persist shopping checks:', e);
     }
 }
 
