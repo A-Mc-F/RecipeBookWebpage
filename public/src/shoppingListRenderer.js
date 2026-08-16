@@ -185,41 +185,31 @@ function createIngredientListItem(text, persistedChecks, isHtml = false) {
     const li = document.createElement('li');
     li.className = 'shopping-item';
 
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    // Use the text content as a stable key
     const key = isHtml ? stripHtml(text) : text;
-    checkbox.checked = !!persistedChecks[key];
-    checkbox.addEventListener('change', () => {
-        // Persist shared check state via dataHandler
-        updateShoppingCheck(key, checkbox.checked).catch(err => console.error('Failed to update shared check:', err));
-        // visual feedback
-        if (checkbox.checked) {
-            label.style.textDecoration = 'line-through';
-            label.style.color = 'silver';
-        } else {
-            label.style.textDecoration = 'none';
-            label.style.color = '';
-        }
-    });
+    const isChecked = !!persistedChecks[key];
 
     const label = document.createElement('label');
     label.style.cursor = 'pointer';
+    label.style.display = 'block';
     if (isHtml) {
         label.innerHTML = text;
     } else {
         label.textContent = text;
     }
-    // Initialize visual state
-    if (checkbox.checked) {
+
+    if (isChecked) {
         label.style.textDecoration = 'line-through';
         label.style.color = 'silver';
     }
 
-    // clicking the label toggles the checkbox
-    label.addEventListener('click', () => { checkbox.checked = !checkbox.checked; checkbox.dispatchEvent(new Event('change')); });
+    label.addEventListener('click', () => {
+        const currentChecked = getComputedStyle(label).textDecoration.includes('line-through');
+        const nextValue = !currentChecked;
+        updateShoppingCheck(key, nextValue).catch(err => console.error('Failed to update shared check:', err));
+        label.style.textDecoration = nextValue ? 'line-through' : 'none';
+        label.style.color = nextValue ? 'silver' : '';
+    });
 
-    li.appendChild(checkbox);
     li.appendChild(label);
     return li;
 }
@@ -259,7 +249,7 @@ function addCopyButton(container) {
 async function copyToClipboardPlain() {
     // Format lines as "- [ ] Item" or "- [x] Item" so Apple Notes recognizes checklists
     const plain = Array.from(document.querySelectorAll('.shopping-item label')).map(l => {
-        const checked = l.previousSibling && l.previousSibling.checked;
+        const checked = getComputedStyle(l).textDecoration.includes('line-through');
         const chk = checked ? '[x]' : '[ ]';
         return `- ${chk} ${l.textContent}`;
     }).join('\n');

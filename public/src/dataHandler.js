@@ -96,13 +96,22 @@ export function getMealplanName() {
 }
 
 export function setMealplanName(name) {
+    const nextName = String(name ?? '').trim();
+    if (!nextName) {
+        mealplanName = null;
+        mealplanData = { name: '', type: 'mealplan', items: [] };
+        shoppingChecks = {};
+        notifyChange();
+        return;
+    }
+
     // Unsubscribe from any previous mealplan
     if (mealplanUnsubscribe) {
         mealplanUnsubscribe();
         mealplanUnsubscribe = null;
     }
 
-    mealplanName = name;
+    mealplanName = nextName;
 
     // Start a real-time listener on the mealplan document so multiple users
     // opening the same "codeword" (document id) see live updates.
@@ -110,12 +119,12 @@ export function setMealplanName(name) {
     mealplanUnsubscribe = onSnapshot(mealplanDocRef, (snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.data();
-            if (data && data.mealplan) {
+            shoppingChecks = data && data.checks ? data.checks : {};
+
+            if (data && data.mealplan && typeof data.mealplan === 'object') {
                 mealplanData = data.mealplan;
-                shoppingChecks = data.checks || {};
-            } else {
+            } else if (!mealplanData || !Array.isArray(mealplanData.items)) {
                 mealplanData = { name: mealplanName, type: 'mealplan', items: [] };
-                shoppingChecks = {};
             }
         } else {
             mealplanData = { name: mealplanName, type: 'mealplan', items: [] };
@@ -143,9 +152,10 @@ export function getShoppingChecks() {
 }
 
 export async function updateShoppingCheck(key, value) {
-    // Update local copy
+    // Update local copy first so the current tab reflects the new item state immediately.
     shoppingChecks = shoppingChecks || {};
     shoppingChecks[key] = !!value;
+    notifyChange();
 
     if (!mealplanName) {
         // If not joined to a mealplan, persist to localStorage for single-user use
@@ -155,13 +165,17 @@ export async function updateShoppingCheck(key, value) {
         return;
     }
 
+    const mealplanPayload = (mealplanData && mealplanData.type === 'mealplan')
+        ? mealplanData
+        : { name: mealplanName, type: 'mealplan', items: [] };
+
     const ref = doc(database, 'mealplans', mealplanName);
     try {
-        await updateDoc(ref, { checks: shoppingChecks, timestamp: new Date() });
+        await updateDoc(ref, { mealplan: mealplanPayload, checks: shoppingChecks, timestamp: new Date() });
     } catch (err) {
         // If update fails (document may not exist), create it with mealplan and checks
         try {
-            await setDoc(ref, { mealplan: mealplanData, checks: shoppingChecks, timestamp: new Date() }, { merge: true });
+            await setDoc(ref, { mealplan: mealplanPayload, checks: shoppingChecks, timestamp: new Date() }, { merge: true });
         } catch (e) {
             console.error('Failed to persist shopping checks:', e);
         }
@@ -176,8 +190,9 @@ async function saveMealplanPatch(patchFn) {
         await runTransaction(database, async (transaction) => {
             const snap = await transaction.get(ref);
             const serverMealplan = (snap.exists() && snap.data().mealplan) ? snap.data().mealplan : { name: mealplanName, type: 'mealplan', items: [] };
+            const serverChecks = (snap.exists() && snap.data().checks) ? snap.data().checks : shoppingChecks;
             const newMealplan = patchFn(JSON.parse(JSON.stringify(serverMealplan)));
-            transaction.set(ref, { mealplan: newMealplan, timestamp: new Date() });
+            transaction.set(ref, { mealplan: newMealplan, checks: serverChecks, timestamp: new Date() }, { merge: true });
         });
     } catch (err) {
         console.error('Transaction failed:', err);
@@ -224,18 +239,17 @@ function applyAtPath(root, path, op) {
 async function saveMealplanToFirestore() {
     if (!mealplanName) return;
     const ref = doc(database, 'mealplans', mealplanName);
-    // Use updateDoc if the document exists to avoid stomping metadata; fall back to setDoc.
+    const payload = {
+        mealplan: mealplanData,
+        checks: shoppingChecks || {},
+        timestamp: new Date()
+    };
+
     try {
-        await updateDoc(ref, {
-            mealplan: mealplanData,
-            timestamp: new Date()
-        });
+        await updateDoc(ref, payload);
     } catch (err) {
         // If update fails (document may not exist), create it.
-        await setDoc(ref, {
-            mealplan: mealplanData,
-            timestamp: new Date()
-        });
+        await setDoc(ref, payload, { merge: true });
     }
 }
 
@@ -267,6 +281,13 @@ export function leaveMealplan() {
 
 //CREATE
 export function addMealplanItem(container, item) {
+    if (!mealplanName) {
+        if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+            window.alert('Please join a mealplan before adding items.');
+        }
+        return;
+    }
+
     // Update local state immediately for snappy UI
     container.items.push(item);
     notifyChange();

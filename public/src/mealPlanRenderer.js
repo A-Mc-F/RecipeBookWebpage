@@ -1,6 +1,6 @@
 import { recipeCard } from "./recipeCard.js";
 import { getState, setChangeListener, setState } from "./stateMachine.js";
-import { getAllRecipes, getMealplanData, setMealplanChangeListener, addMealplanItem, removeMealplanItem, updateMealplanItem } from "./dataHandler.js";
+import { getAllRecipes, getMealplanData, setMealplanChangeListener, addMealplanItem, removeMealplanItem, updateMealplanItem, getMealplanName } from "./dataHandler.js";
 
 // --- Render the meal plan recursively ---
 export function renderMealplan() {
@@ -184,6 +184,11 @@ function textInput(object) {
 }
 
 function selectGroup(group) {
+    if (!getMealplanName()) {
+        alert('Please join a mealplan before adding recipes.');
+        return;
+    }
+
     setState('group', group)
     if (getState('recipe') !== null) {
         let recipeObj = { type: 'recipe', name: getState('recipe').name, recipeId: getState('recipe').id }
@@ -222,6 +227,11 @@ function recipeListButton(object) {
 }
 
 function addItem(object) {
+    if (!getMealplanName()) {
+        alert('Please join a mealplan before adding items.');
+        return;
+    }
+
     switch (object.type) {
         case 'mealplan':
             addMealplanItem(object, { type: 'day', name: '', items: [] });

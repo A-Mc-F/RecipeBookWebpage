@@ -22,19 +22,18 @@ function notifyChange(state) {
 
 
 document.addEventListener('click', function (event) {
-    console.log('detected click')
-    const excludedTag = 'selectable'
+    const target = event.target;
 
-    // Start looping through parent elements
-    let currentElement = event.target;
-    while (currentElement.parentElement) {
-        //console.log(currentElement)
-        if (currentElement.getAttribute('tag') === excludedTag) {
-            return
-        }
-        currentElement = currentElement.parentElement; // Move to the parent element
+    if (!(target instanceof Element)) {
+        return;
     }
-    clearSelections()
+
+    // Ignore clicks inside local UI controls so they do not trigger a global selection reset.
+    if (target.closest('[tag="selectable"], .shopping-item, label, input, textarea, button, select, a')) {
+        return;
+    }
+
+    clearSelections();
 })
 
 export function setState(state, value) {
