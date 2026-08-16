@@ -286,6 +286,14 @@ nav {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
+/* Smaller variant for leave button inside join UI */
+.small-cta {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 12px;
+    border-width: 1px;
+}
+
 button[type="submit"] {
     font-family: inherit;
     font-size: 16px;
@@ -812,7 +820,21 @@ div#shopping-list {
     cursor: pointer;
 }
 
+.random-choice-card p {
+    display: none;
+    /* details removed; show only title */
+}
+
 .random-choice-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* 'or' separator between two choices */
+.random-or {
+    color: rgba(255, 255, 255, 0.9);
+    align-self: center;
+    margin: 0 8px;
+    font-weight: 600;
+    font-size: 1rem;
 }

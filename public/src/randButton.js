@@ -32,22 +32,17 @@ function pickTwoDistinct(arr) {
 function showChoices(options) {
     if (!modal || !container) return;
     container.innerHTML = '';
-    options.forEach(opt => {
+    if (!options || options.length === 0) return;
+
+    function makeCard(opt) {
         const card = document.createElement('div');
         card.className = 'random-choice-card';
         const title = document.createElement('h3');
         title.textContent = opt.name || 'Unnamed Recipe';
-        const desc = document.createElement('p');
-        desc.textContent = opt.description || (opt.ingredients ? opt.ingredients.slice(0, 3).join(', ') : '');
-        const chooseBtn = document.createElement('button');
-        chooseBtn.className = 'choose';
-        chooseBtn.textContent = 'Choose';
 
-        // Clicking the card or button picks this recipe
         const pickHandler = () => {
             const containerState = getState('group');
             if (!containerState) {
-                // If no group selected, fallback to top-level mealplan container
                 addMealplanItem(getMealplanData(), { type: 'recipe', recipeId: opt.id });
             } else {
                 addMealplanItem(containerState, { type: 'recipe', recipeId: opt.id });
@@ -56,13 +51,21 @@ function showChoices(options) {
         };
 
         card.addEventListener('click', pickHandler);
-        chooseBtn.addEventListener('click', (e) => { e.stopPropagation(); pickHandler(); });
-
         card.appendChild(title);
-        card.appendChild(desc);
-        card.appendChild(chooseBtn);
-        container.appendChild(card);
-    });
+        return card;
+    }
+
+    // Append first card
+    container.appendChild(makeCard(options[0]));
+
+    // If there is a second option, insert an 'or' separator then the second card
+    if (options.length >= 2) {
+        const orEl = document.createElement('div');
+        orEl.className = 'random-or';
+        orEl.textContent = 'or';
+        container.appendChild(orEl);
+        container.appendChild(makeCard(options[1]));
+    }
     openModal();
 }
 

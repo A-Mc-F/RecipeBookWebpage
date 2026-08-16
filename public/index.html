@@ -33,17 +33,21 @@
                 <div class="recipe-list scrollable-list" id="recipe-list"></div>
             </div>
             <div class="panel glass hero" id="plan-panel">
-                <div class="cta-button" id="random-recipe-btn">
-                    <span>Random Recipe</span>
-                    <img src="./icons/random.png" class="icon-button">
-                </div>
-                    <div style="display:flex;gap:8px;align-items:center;padding:8px;margin-top:12px;" id="mealplan-join-ui">
-                        <input type="text" id="mealplan-code-input" placeholder="Enter mealplan codeword" style="padding:6px;" />
-                        <button id="join-mealplan-btn" class="cta-button"><span>Join</span></button>
-                        <button id="leave-mealplan-btn" class="cta-button" style="display:none;"><span>Leave</span></button>
-                        <div id="current-mealplan" style="margin-left:12px;color:#fff;font-weight:600;"></div>
+                    <div id="mealplan-join-ui" style="display:flex;gap:12px;align-items:center;padding:8px;margin-bottom:12px;">
+                        <label id="mealplan-label" for="mealplan-code-input" style="color:#fff;font-weight:600;min-width:160px;">Plan: (not joined)</label>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="text" id="mealplan-code-input" placeholder="Enter mealplan codeword" style="padding:6px;" />
+                            <button id="join-mealplan-btn" class="cta-button"><span>Join</span></button>
+                            <button id="leave-mealplan-btn" class="cta-button small-cta" style="display:none;"><span>Leave</span></button>
+                        </div>
                     </div>
-                <div class="meal-plan scrollable-list" id="meal-plan"></div>
+                    <div class="meal-plan scrollable-list" id="meal-plan"></div>
+                    <div style="margin-top:12px;display:flex;justify-content:center;" id="random-recipe-container">
+                        <div class="cta-button" id="random-recipe-btn">
+                            <span>Random Recipe</span>
+                            <img src="./icons/random.png" class="icon-button">
+                        </div>
+                    </div>
             </div>
             <div class="panel glass hero" id="shop-panel">
                 <div class="shopping-list scrollable-list" id="shopping-list"></div>

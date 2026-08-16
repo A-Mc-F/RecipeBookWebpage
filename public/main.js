@@ -11,16 +11,16 @@ import { setChangeListener, getState } from "./src/stateMachine.js"
 const joinBtn = document.getElementById('join-mealplan-btn');
 const leaveBtn = document.getElementById('leave-mealplan-btn');
 const input = document.getElementById('mealplan-code-input');
-const current = document.getElementById('current-mealplan');
+const label = document.getElementById('mealplan-label');
 
 function updateUIForJoin(name) {
     if (name) {
-        current.textContent = `Joined: ${name}`;
+        label.textContent = `Plan: ${name}`;
         input.style.display = 'none';
         joinBtn.style.display = 'none';
         leaveBtn.style.display = '';
     } else {
-        current.textContent = '';
+        label.textContent = 'Plan: (not joined)';
         input.style.display = '';
         joinBtn.style.display = '';
         leaveBtn.style.display = 'none';
@@ -63,3 +63,5 @@ function updateJoinUIVisibility() {
 setChangeListener('stage', updateJoinUIVisibility);
 // Initialize visibility
 updateJoinUIVisibility();
+// Initialize current label based on existing state
+try { updateUIForJoin(getMealplanName()); } catch (e) { /* ignore */ }
