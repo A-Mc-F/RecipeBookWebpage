@@ -17,7 +17,7 @@ const database = getFirestore(app);
 
 
 
-import { collection, doc, setDoc, getDocs, getDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
+import { collection, doc, setDoc, getDocs, getDoc, addDoc, deleteDoc, onSnapshot, updateDoc, runTransaction } from "https://www.gstatic.com/firebasejs/11.3.0/firebase-firestore.js";
 
 /**
  * @typedef {Object} MealplanItem
@@ -43,6 +43,7 @@ function notifyChange() { if (onMealplanChange) onMealplanChange(mealplanData); 
 let allRecipes = [];
 let mealplanData = /** @type { Mealplan } */ ({ name: '', type: 'mealplan', items: [] });
 let mealplanName = null;
+let mealplanUnsubscribe = null;
 
 // --- Fetch all recipes from Firestore ---
 export async function fetchAllRecipes() {
@@ -83,23 +84,111 @@ export function getMealplanName() {
 }
 
 export function setMealplanName(name) {
+    // Unsubscribe from any previous mealplan
+    if (mealplanUnsubscribe) {
+        mealplanUnsubscribe();
+        mealplanUnsubscribe = null;
+    }
+
     mealplanName = name;
-    loadMealplanFromFirestore();
+
+    // Start a real-time listener on the mealplan document so multiple users
+    // opening the same "codeword" (document id) see live updates.
+    const mealplanDocRef = doc(database, 'mealplans', mealplanName);
+    mealplanUnsubscribe = onSnapshot(mealplanDocRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            if (data && data.mealplan) {
+                mealplanData = data.mealplan;
+            } else {
+                mealplanData = { name: mealplanName, type: 'mealplan', items: [] };
+            }
+        } else {
+            mealplanData = { name: mealplanName, type: 'mealplan', items: [] };
+        }
+        notifyChange();
+    }, (error) => {
+        console.error('Mealplan listener error:', error);
+    });
 }
 
 export function getMealplanData() {
     return mealplanData;
 }
 
+// --- Transactional helpers for finer-grained operations ---
+async function saveMealplanPatch(patchFn) {
+    if (!mealplanName) return;
+    const ref = doc(database, 'mealplans', mealplanName);
+    try {
+        await runTransaction(database, async (transaction) => {
+            const snap = await transaction.get(ref);
+            const serverMealplan = (snap.exists() && snap.data().mealplan) ? snap.data().mealplan : { name: mealplanName, type: 'mealplan', items: [] };
+            const newMealplan = patchFn(JSON.parse(JSON.stringify(serverMealplan)));
+            transaction.set(ref, { mealplan: newMealplan, timestamp: new Date() });
+        });
+    } catch (err) {
+        console.error('Transaction failed:', err);
+        // On failure, reload server state to avoid prolonged divergence.
+        await loadMealplanFromFirestore();
+        throw err;
+    }
+}
+
+function findPathToItem(root, target) {
+    const path = [];
+    let found = false;
+    function dfs(node, currentPath) {
+        if (found) return;
+        if (!node.items) return;
+        for (let i = 0; i < node.items.length; i++) {
+            const child = node.items[i];
+            if (child === target) {
+                path.push(...currentPath, i);
+                found = true;
+                return;
+            }
+            if (child.items) {
+                dfs(child, currentPath.concat(i));
+                if (found) return;
+            }
+        }
+    }
+    dfs(root, []);
+    return found ? path : null;
+}
+
+function applyAtPath(root, path, op) {
+    const copy = root;
+    let node = copy;
+    if (path && path.length > 0) {
+        for (let i = 0; i < path.length; i++) {
+            node = node.items[path[i]];
+        }
+    }
+    return op(node, copy);
+}
+
 async function saveMealplanToFirestore() {
     if (!mealplanName) return;
-    await setDoc(doc(database, 'mealplans', mealplanName), {
-        mealplan: mealplanData,
-        timestamp: new Date()
-    });
+    const ref = doc(database, 'mealplans', mealplanName);
+    // Use updateDoc if the document exists to avoid stomping metadata; fall back to setDoc.
+    try {
+        await updateDoc(ref, {
+            mealplan: mealplanData,
+            timestamp: new Date()
+        });
+    } catch (err) {
+        // If update fails (document may not exist), create it.
+        await setDoc(ref, {
+            mealplan: mealplanData,
+            timestamp: new Date()
+        });
+    }
 }
 
 async function loadMealplanFromFirestore() {
+    // Kept for backwards compatibility: load once without subscribing.
     if (!mealplanName) return;
     const mealplanDoc = await getDoc(doc(database, 'mealplans', mealplanName));
     if (mealplanDoc.exists()) {
@@ -110,13 +199,34 @@ async function loadMealplanFromFirestore() {
     notifyChange();
 }
 
+export function leaveMealplan() {
+    if (mealplanUnsubscribe) {
+        mealplanUnsubscribe();
+        mealplanUnsubscribe = null;
+    }
+    mealplanName = null;
+    mealplanData = { name: '', type: 'mealplan', items: [] };
+    notifyChange();
+}
+
 // --- Centralized mutation helpers ---
 
 //CREATE
 export function addMealplanItem(container, item) {
+    // Update local state immediately for snappy UI
     container.items.push(item);
-    saveMealplanToFirestore();
     notifyChange();
+
+    // Persist via transaction that targets the same container path server-side
+    const path = (container === mealplanData) ? [] : findPathToItem(mealplanData, container);
+    saveMealplanPatch((serverMealplan) => {
+        applyAtPath(serverMealplan, path, (node) => {
+            node.items = node.items || [];
+            node.items.push(item);
+            return serverMealplan;
+        });
+        return serverMealplan;
+    }).catch(err => console.error('Failed to save addMealplanItem:', err));
 }
 
 //READ
@@ -177,24 +287,67 @@ export function getMealplanItemParent(searchItem) {
 
 //UPDATE
 export function updateMealplanItem(item, newData) {
-    let searchResult = getMealplanItemParent(item)
+    const searchResult = getMealplanItemParent(item);
+    if (!searchResult.parent) return;
+    // Local update
     searchResult.parent.items[searchResult.index] = { ...item, ...newData };
-    saveMealplanToFirestore();
     notifyChange();
+
+    // Server-side transactional update
+    const parentPath = (searchResult.parent === mealplanData) ? [] : findPathToItem(mealplanData, searchResult.parent);
+    const index = searchResult.index;
+    saveMealplanPatch((serverMealplan) => {
+        applyAtPath(serverMealplan, parentPath, (node) => {
+            node.items = node.items || [];
+            if (index >= 0 && index < node.items.length) {
+                node.items[index] = { ...node.items[index], ...newData };
+            }
+            return serverMealplan;
+        });
+        return serverMealplan;
+    }).catch(err => console.error('Failed to save updateMealplanItem:', err));
 }
 
 //DELETE
 export function removeMealplanItem(item) {
-    let searchResult = getMealplanItemParent(item)
-    searchResult.parent.items.splice(searchResult.index, 1)
-    saveMealplanToFirestore();
+    const searchResult = getMealplanItemParent(item);
+    if (!searchResult.parent) return;
+    // Local update
+    searchResult.parent.items.splice(searchResult.index, 1);
     notifyChange();
+
+    // Server-side remove
+    const parentPath = (searchResult.parent === mealplanData) ? [] : findPathToItem(mealplanData, searchResult.parent);
+    const index = searchResult.index;
+    saveMealplanPatch((serverMealplan) => {
+        applyAtPath(serverMealplan, parentPath, (node) => {
+            node.items = node.items || [];
+            if (index >= 0 && index < node.items.length) {
+                node.items.splice(index, 1);
+            }
+            return serverMealplan;
+        });
+        return serverMealplan;
+    }).catch(err => console.error('Failed to save removeMealplanItem:', err));
 }
 
 export function replaceMealplanItem(originalItem, newItem) {
-    const searchResult = getMealplanItemParent(originalItem)
-    removeMealplanItem(originalItem)
-    searchResult.parent.items.splice(searchResult.index, 0, newItem)
-    saveMealplanToFirestore()
-    notifyChange()
+    const searchResult = getMealplanItemParent(originalItem);
+    if (!searchResult.parent) return;
+    // Local replace
+    searchResult.parent.items.splice(searchResult.index, 1, newItem);
+    notifyChange();
+
+    const parentPath = (searchResult.parent === mealplanData) ? [] : findPathToItem(mealplanData, searchResult.parent);
+    const index = searchResult.index;
+    saveMealplanPatch((serverMealplan) => {
+        applyAtPath(serverMealplan, parentPath, (node) => {
+            node.items = node.items || [];
+            if (index >= 0 && index < node.items.length) {
+                node.items.splice(index, 1, newItem);
+            }
+            return serverMealplan;
+        });
+        return serverMealplan;
+    }).catch(err => console.error('Failed to save replaceMealplanItem:', err));
 }

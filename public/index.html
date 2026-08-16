@@ -9,6 +9,7 @@
 </head>
 
 <body>
+    <!-- Join UI is shown inside the Meal Plan panel only -->
     <!-- Stage Slider -->
     <nav class="nav-links" id="stage-slider" tag="selectable">
         <div id="Book" class="stage-selector active">
@@ -36,6 +37,12 @@
                     <span>Random Recipe</span>
                     <img src="./icons/random.png" class="icon-button">
                 </div>
+                    <div style="display:flex;gap:8px;align-items:center;padding:8px;margin-top:12px;" id="mealplan-join-ui">
+                        <input type="text" id="mealplan-code-input" placeholder="Enter mealplan codeword" style="padding:6px;" />
+                        <button id="join-mealplan-btn" class="cta-button"><span>Join</span></button>
+                        <button id="leave-mealplan-btn" class="cta-button" style="display:none;"><span>Leave</span></button>
+                        <div id="current-mealplan" style="margin-left:12px;color:#fff;font-weight:600;"></div>
+                    </div>
                 <div class="meal-plan scrollable-list" id="meal-plan"></div>
             </div>
             <div class="panel glass hero" id="shop-panel">
@@ -63,6 +70,17 @@
                     <span>Done</span>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="modal" id="random-choice-modal">
+        <div class="panel glass hero" style="max-width:900px;padding:20px;position:relative;">
+            <button class="close-modal" id="random-modal-close" aria-label="Close"
+                style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#fff;">&#10005;</button>
+            <h2 style="color:white;margin-bottom:12px;text-align:center;">Choose a recipe</h2>
+            <div id="random-choice-container" style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;padding:8px;">
+                <!-- Two random recipe choice cards will be injected here -->
+            </div>
         </div>
     </div>
 
