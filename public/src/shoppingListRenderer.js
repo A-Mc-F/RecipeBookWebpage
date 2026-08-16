@@ -113,7 +113,7 @@ export function renderShoppingList(sortMode = SortMode) {
     }
 
     // Add copy button at top of shopping list
-    addCopyButton(shoppingListPage, persistedChecks);
+    addCopyButton(shoppingListPage);
 }
 
 window.addMiscShoppingItem = function () {
@@ -220,25 +220,15 @@ function stripHtml(html) {
     return tmp.textContent || tmp.innerText || '';
 }
 
-function addCopyButton(container, persistedChecks) {
+function addCopyButton(container) {
     // Avoid adding multiple buttons
-    if (document.getElementById('copy-to-notes-btn')) return;
+    if (document.getElementById('copy-to-clipboard-btn')) return;
 
     const wrapper = document.createElement('div');
     wrapper.style.display = 'flex';
     wrapper.style.gap = '8px';
     wrapper.style.alignItems = 'center';
     wrapper.style.padding = '8px 0';
-
-    const notesBtn = document.createElement('button');
-    notesBtn.id = 'copy-to-notes-btn';
-    notesBtn.className = 'cta-button';
-    notesBtn.textContent = 'Copy to Apple Notes';
-    notesBtn.addEventListener('click', async () => {
-        await copyToAppleNotes(persistedChecks);
-        notesBtn.textContent = 'Copied ✓';
-        setTimeout(() => notesBtn.textContent = 'Copy to Apple Notes', 1500);
-    });
 
     const clipBtn = document.createElement('button');
     clipBtn.id = 'copy-to-clipboard-btn';
@@ -250,64 +240,11 @@ function addCopyButton(container, persistedChecks) {
         setTimeout(() => clipBtn.textContent = 'Copy to Clipboard', 1500);
     });
 
-    wrapper.appendChild(notesBtn);
     wrapper.appendChild(clipBtn);
     container.insertBefore(wrapper, container.firstChild);
 }
 
-async function copyToAppleNotes(persistedChecks) {
-    // Build HTML list with real checkboxes so Notes may interpret them as checklist items
-    const shopping = document.querySelectorAll('.shopping-item');
-    if (!shopping || shopping.length === 0) return;
-
-    const ul = document.createElement('ul');
-    for (let item of shopping) {
-        const li = document.createElement('li');
-        const checkbox = item.querySelector('input[type=checkbox]');
-        const label = item.querySelector('label');
-        const check = checkbox && checkbox.checked;
-        const cb = document.createElement('input');
-        cb.type = 'checkbox';
-        if (check) cb.checked = true;
-        // Make non-interactive but present in HTML
-        cb.disabled = false;
-        li.appendChild(cb);
-        // preserve innerHTML from label to retain recipe note spans
-        li.innerHTML += ' ' + (label.innerHTML || label.textContent);
-        ul.appendChild(li);
-    }
-
-    const htmlBlob = new Blob([ul.outerHTML], { type: 'text/html' });
-    const plain = Array.from(document.querySelectorAll('.shopping-item label')).map(l => {
-        const chk = l.previousSibling && l.previousSibling.checked ? '[x]' : '[ ]';
-        return `${chk} ${l.textContent}`;
-    }).join('\n');
-
-    try {
-        // Use Clipboard API where supported with both HTML and plain text
-        if (navigator.clipboard && navigator.clipboard.write) {
-            const data = [
-                new ClipboardItem({
-                    'text/html': htmlBlob,
-                    'text/plain': new Blob([plain], { type: 'text/plain' })
-                })
-            ];
-            await navigator.clipboard.write(data);
-        } else if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(plain);
-        } else {
-            // Fallback: create textarea and execCommand
-            const ta = document.createElement('textarea');
-            ta.value = plain;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            ta.remove();
-        }
-    } catch (e) {
-        console.error('copy failed', e);
-    }
-}
+// The Apple Notes-specific clipboard function was removed — use plain clipboard copy only.
 
 async function copyToClipboardPlain() {
     const plain = Array.from(document.querySelectorAll('.shopping-item label')).map(l => {
