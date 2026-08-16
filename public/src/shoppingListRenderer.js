@@ -20,6 +20,9 @@ export function renderShoppingList(sortMode = SortMode) {
     const shoppingListPage = document.getElementById('shopping-list');
     shoppingListPage.innerHTML = ''; // Clear existing content
 
+    // Load persisted checkbox state
+    const persistedChecks = loadChecks();
+
     /** @type {Mealplan} */
     const mealplanData = getMealplanData();
 
@@ -79,9 +82,7 @@ export function renderShoppingList(sortMode = SortMode) {
             ul.className = 'shopping-list-group';
 
             recipe.ingredients.forEach(ingredient => {
-                const li = document.createElement('li');
-                li.textContent = ingredient;
-                li.onclick = function () { toggleStrikethrough(li); };
+                const li = createIngredientListItem(ingredient, persistedChecks);
                 ul.appendChild(li);
             });
 
@@ -105,12 +106,14 @@ export function renderShoppingList(sortMode = SortMode) {
         });
 
         allIngredients.forEach(item => {
-            const li = document.createElement('li');
-            li.innerHTML = `${item.ingredient} <span style="color:gray;font-size:0.9em;">(${item.recipe})</span>`;
-            li.onclick = function () { toggleStrikethrough(li); };
+            const text = `${item.ingredient} <span style="color:gray;font-size:0.9em;">(${item.recipe})</span>`;
+            const li = createIngredientListItem(text, persistedChecks, /*isHtml=*/true);
             shoppingListPage.appendChild(li);
         });
     }
+
+    // Add copy button at top of shopping list
+    addCopyButton(shoppingListPage, persistedChecks);
 }
 
 window.addMiscShoppingItem = function () {
@@ -145,6 +148,186 @@ function toggleStrikethrough(element) {
         element.style.textDecoration = decoration;
         element.style.color = 'silver';
         element.parentElement.appendChild(element);
+    }
+}
+
+
+// Persisted checkbox state helpers
+function loadChecks() {
+    try {
+        const raw = localStorage.getItem('shoppingChecks');
+        return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function saveChecks(map) {
+    try {
+        localStorage.setItem('shoppingChecks', JSON.stringify(map));
+    } catch (e) {
+        // ignore
+    }
+}
+
+function createIngredientListItem(text, persistedChecks, isHtml = false) {
+    const li = document.createElement('li');
+    li.className = 'shopping-item';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    // Use the text content as a stable key
+    const key = isHtml ? stripHtml(text) : text;
+    checkbox.checked = !!persistedChecks[key];
+    checkbox.addEventListener('change', () => {
+        const map = loadChecks();
+        map[key] = checkbox.checked;
+        saveChecks(map);
+        // visual feedback
+        if (checkbox.checked) {
+            label.style.textDecoration = 'line-through';
+            label.style.color = 'silver';
+        } else {
+            label.style.textDecoration = 'none';
+            label.style.color = '';
+        }
+    });
+
+    const label = document.createElement('label');
+    label.style.cursor = 'pointer';
+    if (isHtml) {
+        label.innerHTML = text;
+    } else {
+        label.textContent = text;
+    }
+    // Initialize visual state
+    if (checkbox.checked) {
+        label.style.textDecoration = 'line-through';
+        label.style.color = 'silver';
+    }
+
+    // clicking the label toggles the checkbox
+    label.addEventListener('click', () => { checkbox.checked = !checkbox.checked; checkbox.dispatchEvent(new Event('change')); });
+
+    li.appendChild(checkbox);
+    li.appendChild(label);
+    return li;
+}
+
+function stripHtml(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+}
+
+function addCopyButton(container, persistedChecks) {
+    // Avoid adding multiple buttons
+    if (document.getElementById('copy-to-notes-btn')) return;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.gap = '8px';
+    wrapper.style.alignItems = 'center';
+    wrapper.style.padding = '8px 0';
+
+    const notesBtn = document.createElement('button');
+    notesBtn.id = 'copy-to-notes-btn';
+    notesBtn.className = 'cta-button';
+    notesBtn.textContent = 'Copy to Apple Notes';
+    notesBtn.addEventListener('click', async () => {
+        await copyToAppleNotes(persistedChecks);
+        notesBtn.textContent = 'Copied ✓';
+        setTimeout(() => notesBtn.textContent = 'Copy to Apple Notes', 1500);
+    });
+
+    const clipBtn = document.createElement('button');
+    clipBtn.id = 'copy-to-clipboard-btn';
+    clipBtn.className = 'cta-button';
+    clipBtn.textContent = 'Copy to Clipboard';
+    clipBtn.addEventListener('click', async () => {
+        await copyToClipboardPlain();
+        clipBtn.textContent = 'Copied ✓';
+        setTimeout(() => clipBtn.textContent = 'Copy to Clipboard', 1500);
+    });
+
+    wrapper.appendChild(notesBtn);
+    wrapper.appendChild(clipBtn);
+    container.insertBefore(wrapper, container.firstChild);
+}
+
+async function copyToAppleNotes(persistedChecks) {
+    // Build HTML list with real checkboxes so Notes may interpret them as checklist items
+    const shopping = document.querySelectorAll('.shopping-item');
+    if (!shopping || shopping.length === 0) return;
+
+    const ul = document.createElement('ul');
+    for (let item of shopping) {
+        const li = document.createElement('li');
+        const checkbox = item.querySelector('input[type=checkbox]');
+        const label = item.querySelector('label');
+        const check = checkbox && checkbox.checked;
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        if (check) cb.checked = true;
+        // Make non-interactive but present in HTML
+        cb.disabled = false;
+        li.appendChild(cb);
+        // preserve innerHTML from label to retain recipe note spans
+        li.innerHTML += ' ' + (label.innerHTML || label.textContent);
+        ul.appendChild(li);
+    }
+
+    const htmlBlob = new Blob([ul.outerHTML], { type: 'text/html' });
+    const plain = Array.from(document.querySelectorAll('.shopping-item label')).map(l => {
+        const chk = l.previousSibling && l.previousSibling.checked ? '[x]' : '[ ]';
+        return `${chk} ${l.textContent}`;
+    }).join('\n');
+
+    try {
+        // Use Clipboard API where supported with both HTML and plain text
+        if (navigator.clipboard && navigator.clipboard.write) {
+            const data = [
+                new ClipboardItem({
+                    'text/html': htmlBlob,
+                    'text/plain': new Blob([plain], { type: 'text/plain' })
+                })
+            ];
+            await navigator.clipboard.write(data);
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(plain);
+        } else {
+            // Fallback: create textarea and execCommand
+            const ta = document.createElement('textarea');
+            ta.value = plain;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+        }
+    } catch (e) {
+        console.error('copy failed', e);
+    }
+}
+
+async function copyToClipboardPlain() {
+    const plain = Array.from(document.querySelectorAll('.shopping-item label')).map(l => {
+        const chk = l.previousSibling && l.previousSibling.checked ? '[x]' : '[ ]';
+        return `${chk} ${l.textContent}`;
+    }).join('\n');
+
+    try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(plain);
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = plain;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+        }
+    } catch (e) {
+        console.error('plain copy failed', e);
     }
 }
 
