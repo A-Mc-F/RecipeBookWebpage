@@ -1,5 +1,5 @@
 import { getState, setChangeListener } from "./stateMachine.js";
-import { getMealplanData, addMealplanItem, getMealplanItem, getRecipeByID } from "./dataHandler.js";
+import { getMealplanData, addMealplanItem, getMealplanItem, getRecipeByID, getShoppingChecks, updateShoppingCheck } from "./dataHandler.js";
 
 let SortMode = "alpha"; // Default sort mode
 
@@ -20,8 +20,8 @@ export function renderShoppingList(sortMode = SortMode) {
     const shoppingListPage = document.getElementById('shopping-list');
     shoppingListPage.innerHTML = ''; // Clear existing content
 
-    // Load persisted checkbox state
-    const persistedChecks = loadChecks();
+    // Load persisted checkbox state (shared via mealplan when joined)
+    const persistedChecks = getShoppingChecks() || {};
 
     /** @type {Mealplan} */
     const mealplanData = getMealplanData();
@@ -180,9 +180,8 @@ function createIngredientListItem(text, persistedChecks, isHtml = false) {
     const key = isHtml ? stripHtml(text) : text;
     checkbox.checked = !!persistedChecks[key];
     checkbox.addEventListener('change', () => {
-        const map = loadChecks();
-        map[key] = checkbox.checked;
-        saveChecks(map);
+        // Persist shared check state via dataHandler
+        updateShoppingCheck(key, checkbox.checked).catch(err => console.error('Failed to update shared check:', err));
         // visual feedback
         if (checkbox.checked) {
             label.style.textDecoration = 'line-through';

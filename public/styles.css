@@ -231,6 +231,36 @@ nav {
     justify-items: center;
 }
 
+/* Mealplan join UI expanded state: overlay the panel when not joined */
+#plan-panel {
+    position: relative;
+}
+
+#mealplan-join-ui.expanded {
+    position: absolute;
+    inset: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    z-index: 2;
+}
+
+/* Ensure meal plan recipes are top-justified and horizontally centered */
+#meal-plan {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* horizontal centering */
+    justify-content: flex-start;
+    /* top-justified */
+    padding-top: 12px;
+}
+
 .hero-image {
     display: flex;
     justify-content: center;

@@ -31,21 +31,13 @@ function renderMealplanContainer(object) {
     switch (object.type) {
         case 'mealplan':
             {
-                let headingRow = document.createElement('div');
-                headingRow.className = 'heading-row'
-                let mealplanName = document.createElement('h3')
-                mealplanName.innerText = object.name
-                headingRow.appendChild(mealplanName);
-                // headingRow.appendChild(spacer)
-                el.appendChild(headingRow)
-
+                // Top-level mealplan name is shown in the Join/Leave UI only.
+                // Do not render the mealplan heading here to avoid duplicate titles.
                 if (object.items && !(object.items.length === 0)) {
                     object.items.forEach((item) => {
                         el.appendChild(renderMealplanContainer(item));
                     })
                 }
-
-                // el.appendChild(plusButton(object))
 
                 return el
             }

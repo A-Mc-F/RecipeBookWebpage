@@ -44,6 +44,8 @@ let allRecipes = [];
 let mealplanData = /** @type { Mealplan } */ ({ name: '', type: 'mealplan', items: [] });
 let mealplanName = null;
 let mealplanUnsubscribe = null;
+let shoppingChecks = {};
+let shoppingChecksUnsubscribe = null;
 
 // --- Fetch all recipes from Firestore ---
 export async function fetchAllRecipes() {
@@ -100,11 +102,14 @@ export function setMealplanName(name) {
             const data = snapshot.data();
             if (data && data.mealplan) {
                 mealplanData = data.mealplan;
+                shoppingChecks = data.checks || {};
             } else {
                 mealplanData = { name: mealplanName, type: 'mealplan', items: [] };
+                shoppingChecks = {};
             }
         } else {
             mealplanData = { name: mealplanName, type: 'mealplan', items: [] };
+            shoppingChecks = {};
         }
         notifyChange();
     }, (error) => {
@@ -114,6 +119,43 @@ export function setMealplanName(name) {
 
 export function getMealplanData() {
     return mealplanData;
+}
+
+export function getShoppingChecks() {
+    if (mealplanName) return shoppingChecks;
+    // Fallback to localStorage when not joined to a mealplan
+    try {
+        const raw = localStorage.getItem('shoppingChecks');
+        return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+export async function updateShoppingCheck(key, value) {
+    // Update local copy
+    shoppingChecks = shoppingChecks || {};
+    shoppingChecks[key] = !!value;
+
+    if (!mealplanName) {
+        // If not joined to a mealplan, persist to localStorage for single-user use
+        try {
+            localStorage.setItem('shoppingChecks', JSON.stringify(shoppingChecks));
+        } catch (e) { /* ignore */ }
+        return;
+    }
+
+    const ref = doc(database, 'mealplans', mealplanName);
+    try {
+        await updateDoc(ref, { checks: shoppingChecks, timestamp: new Date() });
+    } catch (err) {
+        // If update fails (document may not exist), create it with mealplan and checks
+        try {
+            await setDoc(ref, { mealplan: mealplanData, checks: shoppingChecks, timestamp: new Date() }, { merge: true });
+        } catch (e) {
+            console.error('Failed to persist shopping checks:', e);
+        }
+    }
 }
 
 // --- Transactional helpers for finer-grained operations ---

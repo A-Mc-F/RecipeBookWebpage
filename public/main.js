@@ -12,6 +12,9 @@ const joinBtn = document.getElementById('join-mealplan-btn');
 const leaveBtn = document.getElementById('leave-mealplan-btn');
 const input = document.getElementById('mealplan-code-input');
 const label = document.getElementById('mealplan-label');
+const mealplanJoinUi = document.getElementById('mealplan-join-ui');
+const mealPlanContainer = document.getElementById('meal-plan');
+const randomRecipeContainer = document.getElementById('random-recipe-container');
 
 function updateUIForJoin(name) {
     if (name) {
@@ -19,11 +22,19 @@ function updateUIForJoin(name) {
         input.style.display = 'none';
         joinBtn.style.display = 'none';
         leaveBtn.style.display = '';
+        // shrink join UI so the meal plan and random button are visible
+        if (mealplanJoinUi) mealplanJoinUi.classList.remove('expanded');
+        if (mealPlanContainer) mealPlanContainer.style.display = '';
+        if (randomRecipeContainer) randomRecipeContainer.style.display = '';
     } else {
         label.textContent = 'Plan: (not joined)';
         input.style.display = '';
         joinBtn.style.display = '';
         leaveBtn.style.display = 'none';
+        // expand join UI to fill the panel and hide the meal plan list and random button
+        if (mealplanJoinUi) mealplanJoinUi.classList.add('expanded');
+        if (mealPlanContainer) mealPlanContainer.style.display = 'none';
+        if (randomRecipeContainer) randomRecipeContainer.style.display = 'none';
     }
 }
 
