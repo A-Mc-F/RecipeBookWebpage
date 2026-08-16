@@ -35,10 +35,20 @@ import { collection, doc, setDoc, getDocs, getDoc, addDoc, deleteDoc, onSnapshot
  */
 
 
-// --- Meal plan change listener ---
-let onMealplanChange = null;
-export function setMealplanChangeListener(cb) { onMealplanChange = cb; }
-function notifyChange() { if (onMealplanChange) onMealplanChange(mealplanData); }
+// --- Meal plan change listeners (support multiple listeners) ---
+let onMealplanChange = [];
+export function setMealplanChangeListener(cb) {
+    if (typeof cb === 'function') onMealplanChange.push(cb);
+}
+function notifyChange() {
+    try {
+        onMealplanChange.forEach(cb => {
+            try { cb(mealplanData); } catch (e) { console.error('mealplan listener error', e); }
+        });
+    } catch (e) {
+        console.error('notifyChange error', e);
+    }
+}
 
 let allRecipes = [];
 let mealplanData = /** @type { Mealplan } */ ({ name: '', type: 'mealplan', items: [] });
@@ -248,6 +258,8 @@ export function leaveMealplan() {
     }
     mealplanName = null;
     mealplanData = { name: '', type: 'mealplan', items: [] };
+    shoppingChecks = {};
+    try { localStorage.removeItem('shoppingChecks'); } catch (e) { /* ignore */ }
     notifyChange();
 }
 

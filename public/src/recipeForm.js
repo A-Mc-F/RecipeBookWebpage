@@ -127,11 +127,11 @@ function parseRecipeFromHtml(htmlText) {
         }
     }
 
-    // WP Recipe Maker specific: prefer wprm structured DOM when present
+    // WP Recipe Maker specific: prefer <ul class="wprm-recipe-ingredients"> when present
     try {
-        const wprmIngEl = doc.querySelector('.wprm-recipe-ingredients');
-        if (wprmIngEl) {
-            const ingredients = Array.from(wprmIngEl.querySelectorAll('li')).map(li => li.textContent.trim()).filter(Boolean);
+        const wprmIngUl = doc.querySelector('ul.wprm-recipe-ingredients');
+        if (wprmIngUl) {
+            const ingredients = Array.from(wprmIngUl.querySelectorAll('li')).map(li => li.textContent.trim()).filter(Boolean);
             const wprmInstEl = doc.querySelector('.wprm-recipe-instructions') || doc.querySelector('.wprm-recipe-instructions-wrapper');
             let instructions = [];
             if (wprmInstEl) {
@@ -217,30 +217,18 @@ function parseRecipeFromHtml(htmlText) {
     return { name: title, ingredients, instructions };
 }
 
-async function importRecipeFromUrl(url, addDirect = false) {
+async function importRecipeFromUrl(url) {
     try {
         if (!url) throw new Error('No URL provided');
         const html = await fetchHtmlThroughProxy(url);
         const parsed = parseRecipeFromHtml(html);
         if (!parsed) throw new Error('No recipe data found on that page');
-
-        // Populate form
+        // Populate form for user review
         document.getElementById('recipe-name').value = parsed.name || '';
         document.getElementById('recipe-ingredients').value = (parsed.ingredients || []).join('\n');
         document.getElementById('recipe-instructions').value = (parsed.instructions || []).join('\n');
 
-        if (addDirect) {
-            const recipe = { name: parsed.name || 'Imported Recipe', ingredients: parsed.ingredients || [], instructions: parsed.instructions || [] };
-            await addRecipe(recipe);
-            alert('Imported and added recipe successfully');
-            document.getElementById('recipe-form').style.display = 'none';
-            // refresh local cache and UI
-            await fetchAllRecipes();
-            renderRecipeBook();
-            renderMealplan();
-        } else {
-            alert('Recipe imported into form. Review and click Done to save.');
-        }
+        alert('Recipe imported into form. Review and click Done to save.');
     } catch (err) {
         console.error('Import error:', err);
         alert('Import failed: ' + err.message);
@@ -248,14 +236,23 @@ async function importRecipeFromUrl(url, addDirect = false) {
 }
 
 // Wire import buttons
-document.getElementById('import-btn').addEventListener('click', () => {
+// Wire Import button: disable while importing and add visual throb
+const importBtn = document.getElementById('import-btn');
+let _isImporting = false;
+importBtn.addEventListener('click', async () => {
+    if (_isImporting) return;
     const url = document.getElementById('import-url').value.trim();
-    importRecipeFromUrl(url, false);
-});
-
-document.getElementById('import-add-btn').addEventListener('click', () => {
-    const url = document.getElementById('import-url').value.trim();
-    importRecipeFromUrl(url, true);
+    if (!url) return alert('Please enter a URL to import from.');
+    try {
+        _isImporting = true;
+        importBtn.disabled = true;
+        importBtn.classList.add('importing');
+        await importRecipeFromUrl(url);
+    } finally {
+        _isImporting = false;
+        importBtn.disabled = false;
+        importBtn.classList.remove('importing');
+    }
 });
 
 async function submitRecipeForm() {
