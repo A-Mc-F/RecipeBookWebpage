@@ -56,6 +56,17 @@ let mealplanName = null;
 let mealplanUnsubscribe = null;
 let shoppingChecks = {};
 let shoppingChecksUnsubscribe = null;
+let miscShoppingItems = loadLocalMiscShoppingItems();
+
+function loadLocalMiscShoppingItems() {
+    try {
+        const raw = localStorage.getItem('miscShoppingItems');
+        const items = raw ? JSON.parse(raw) : [];
+        return Array.isArray(items) ? items : [];
+    } catch (e) {
+        return [];
+    }
+}
 
 // --- Fetch all recipes from Firestore ---
 export async function fetchAllRecipes() {
@@ -101,6 +112,7 @@ export function setMealplanName(name) {
         mealplanName = null;
         mealplanData = { name: '', type: 'mealplan', items: [] };
         shoppingChecks = {};
+        miscShoppingItems = [];
         notifyChange();
         return;
     }
@@ -122,6 +134,7 @@ export function setMealplanName(name) {
         if (snapshot.exists()) {
             const data = snapshot.data();
             shoppingChecks = data && data.checks ? data.checks : (previousMealplan ? shoppingChecks : {});
+            miscShoppingItems = Array.isArray(data && data.miscItems) ? data.miscItems : [];
 
             if (data && data.mealplan && typeof data.mealplan === 'object') {
                 mealplanData = data.mealplan;
@@ -131,6 +144,7 @@ export function setMealplanName(name) {
         } else {
             mealplanData = { name: mealplanName, type: 'mealplan', items: [] };
             shoppingChecks = {};
+            miscShoppingItems = [];
         }
         notifyChange();
     }, (error) => {
@@ -151,6 +165,11 @@ export function getShoppingChecks() {
     } catch (e) {
         return {};
     }
+}
+
+export function getMiscShoppingItems() {
+    if (mealplanName) return miscShoppingItems;
+    return loadLocalMiscShoppingItems();
 }
 
 export async function updateShoppingCheck(key, value) {
@@ -178,6 +197,52 @@ export async function updateShoppingCheck(key, value) {
     } catch (e) {
         console.error('Failed to persist shopping checks:', e);
     }
+}
+
+async function saveMiscShoppingItems() {
+    if (!mealplanName) {
+        try {
+            localStorage.setItem('miscShoppingItems', JSON.stringify(miscShoppingItems));
+        } catch (e) { /* ignore */ }
+        return;
+    }
+
+    const ref = doc(database, 'mealplans', mealplanName);
+    try {
+        await runTransaction(database, async (transaction) => {
+            const snap = await transaction.get(ref);
+            const serverData = snap.exists() ? snap.data() : {};
+            transaction.set(ref, {
+                mealplan: serverData.mealplan || mealplanData,
+                checks: serverData.checks || shoppingChecks || {},
+                miscItems: miscShoppingItems,
+                timestamp: new Date()
+            }, { merge: true });
+        });
+    } catch (e) {
+        console.error('Failed to persist miscellaneous shopping items:', e);
+    }
+}
+
+export function addMiscShoppingItem(text) {
+    const value = String(text ?? '').trim();
+    if (!value) return;
+
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    miscShoppingItems = [...getMiscShoppingItems(), { id, text: value }];
+    notifyChange();
+    return saveMiscShoppingItems();
+}
+
+export function removeMiscShoppingItem(id) {
+    miscShoppingItems = getMiscShoppingItems().filter(item => {
+        const itemId = typeof item === 'string' ? item : item.id;
+        return itemId !== id;
+    });
+    notifyChange();
+    return saveMiscShoppingItems();
 }
 
 // --- Transactional helpers for finer-grained operations ---
@@ -271,6 +336,7 @@ export function leaveMealplan() {
     mealplanName = null;
     mealplanData = { name: '', type: 'mealplan', items: [] };
     shoppingChecks = {};
+    miscShoppingItems = [];
     try { localStorage.removeItem('shoppingChecks'); } catch (e) { /* ignore */ }
     notifyChange();
 }

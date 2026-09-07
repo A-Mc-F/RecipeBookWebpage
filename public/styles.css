@@ -1,8 +1,9 @@
 html,
 body {
-    max-height: 100dvh;
-    /* margin: 0; */
-    overflow: hidden;
+    height: 100%;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
     display: flex;
     width: 100vw;
     flex-direction: column;
@@ -14,25 +15,27 @@ footer {
     flex-direction: row;
     align-items: center;
     width: 100%;
+    flex-shrink: 0;
     /* padding: 1em; */
 }
 
 main {
-    /* flex: 1; */
     display: flex;
     justify-content: flex-start;
     overflow: hidden;
     flex-direction: column;
     width: 100%;
-    height: 90%;
+    min-height: 0;
     flex-wrap: nowrap;
     align-content: center;
     align-items: center;
 }
 
 .panel-window {
+    width: 100%;
     max-width: 100vw;
-    max-height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow: hidden;
     /* padding: 5px; */
     /* margin: 5px; */
@@ -44,7 +47,7 @@ main {
     display: flex;
     transition: transform 0.5s ease-in-out;
     /* Adjust duration and timing function as needed */
-    overflow-y: auto;
+    overflow: hidden;
     flex-direction: row;
     flex: 1;
     width: 300vw;
@@ -57,7 +60,9 @@ main {
 
 .panel {
     width: 100vw;
+    min-width: 100vw;
     float: left;
+    min-height: 0;
     justify-content: center;
     /* align-items: center; */
     /* display: flex; */
@@ -66,7 +71,7 @@ main {
     /* background-color: #f5f5f5; */
     /* transition: width 0.2s; */
     /* overflow: hidden; */
-    margin: 0 10px;
+    margin: 0;
     /* border-radius: 6px; */
     /* border: 1px solid #727272; */
     /* padding: 5px; */
@@ -79,8 +84,25 @@ main {
     height: 2.5ex;
 }
 
+.close-modal {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 1;
+    padding: 0;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    min-width: 44px;
+    min-height: 44px;
+}
+
 .scrollable-list {
-    height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
     width: 100%;
     overflow-y: auto;
     scrollbar-width: none;
@@ -183,6 +205,7 @@ nav {
     justify-content: space-between;
     align-items: center;
     padding: 30px 45px;
+    flex-shrink: 0;
 }
 
 .nav-links {
@@ -190,6 +213,7 @@ nav {
     gap: 30px;
     flex-direction: row;
     justify-content: center;
+    width: 100%;
 }
 
 .nav-links div {
@@ -203,6 +227,11 @@ nav {
     font-size: 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.6);
     text-align: center;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 0;
 }
 
 .nav-links div:hover,
@@ -225,7 +254,8 @@ nav {
 }
 
 .hero {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     align-items: start;
     padding: 10px;
     justify-items: center;
@@ -234,11 +264,17 @@ nav {
 /* Mealplan join UI expanded state: overlay the panel when not joined */
 #plan-panel {
     position: relative;
+    min-width: 0;
+    overflow: hidden;
 }
 
 #mealplan-join-ui.expanded {
-    position: absolute;
-    inset: 12px;
+    position: static;
+    align-self: stretch;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -308,6 +344,12 @@ nav {
     cursor: pointer;
     width: fit-content;
     font-size: 16px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box;
 }
 
 .cta-button:hover {
@@ -318,10 +360,103 @@ nav {
 
 /* Smaller variant for leave button inside join UI */
 .small-cta {
-    padding: 6px 12px;
+    padding: 8px 12px;
     font-size: 0.85rem;
     border-radius: 12px;
     border-width: 1px;
+}
+
+input,
+textarea,
+select,
+button {
+    font: inherit;
+    font-size: 16px;
+}
+
+input,
+textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.mealplan-join,
+.mealplan-join-controls,
+.recipe-import-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mealplan-join {
+    flex-direction: column;
+    align-items: center;
+    width: min(100%, 640px);
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0 auto 12px;
+    padding: 8px;
+}
+
+.mealplan-join label {
+    width: 100%;
+    text-align: center;
+}
+
+.mealplan-join-controls {
+    flex-direction: column;
+    align-items: center;
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: 280px;
+    min-width: 0;
+}
+
+.mealplan-join-controls input {
+    width: 100%;
+    flex: 0 0 auto;
+    padding: 10px;
+}
+
+.recipe-import-row input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 10px;
+}
+
+.heading-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.mealplan-input {
+    min-width: 0;
+    flex: 1 1 auto;
+    padding: 10px;
+}
+
+.drop-box {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px 0;
+}
+
+.random-recipe-container {
+    display: flex;
+    justify-content: center;
+    align-self: center;
+    margin-top: 12px;
+}
+
+.recipe-form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
 }
 
 button[type="submit"] {
@@ -679,6 +814,47 @@ div#shopping-list {
     text-align: left;
 }
 
+.misc-shopping-form {
+    display: flex;
+    gap: 8px;
+    width: min(100%, 560px);
+    margin: 0 auto 12px;
+}
+
+.misc-shopping-form input {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 10px;
+    color: white;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font: inherit;
+}
+
+.misc-shopping-form input::placeholder {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.shopping-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.shopping-item label {
+    flex: 1;
+}
+
+.remove-shopping-item {
+    padding: 3px 8px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
 /* Responsive design */
 @media (max-width: 1024px) {
     .team-grid {
@@ -718,19 +894,19 @@ div#shopping-list {
     }
 
     .nav-links {
-        gap: 15px;
+        gap: 8px;
         justify-content: center;
         flex-direction: row;
         align-items: center;
     }
 
-    .nav-links button {
+    .nav-links div {
         display: block;
         text-align: center;
-        width: 100%;
-        max-width: 200px;
+        width: auto;
+        max-width: none;
         font-size: 14px;
-        padding: 10px 20px;
+        padding: 10px 8px;
     }
 
     .about-content,
@@ -773,6 +949,63 @@ div#shopping-list {
     .logo {
         font-size: 22px;
     }
+
+    header {
+        padding: 10px;
+    }
+
+    nav {
+        width: 100%;
+    }
+
+    .panel {
+        padding: 12px;
+    }
+
+    .mealplan-join-controls,
+    .recipe-import-row,
+    .misc-shopping-form {
+        flex-wrap: wrap;
+    }
+
+    .mealplan-join-controls {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .mealplan-join label {
+        width: 100%;
+        text-align: center;
+    }
+
+    .mealplan-join-controls input {
+        width: 100%;
+        flex: 0 0 auto;
+    }
+
+    .mealplan-join-controls .cta-button {
+        align-self: center;
+        width: auto;
+        flex: 0 0 auto;
+    }
+
+    .recipe-import-row input,
+    .misc-shopping-form input,
+    .recipe-import-row .cta-button,
+    .misc-shopping-form .cta-button {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    .shopping-item {
+        min-height: 44px;
+    }
+
+    .remove-shopping-item {
+        min-width: 44px;
+        min-height: 44px;
+    }
 }
 
 /* Modal styles */
@@ -814,6 +1047,23 @@ div#shopping-list {
     border: none;
 }
 
+#recipe-form .panel {
+    width: min(520px, calc(100% - 24px));
+    min-width: 0;
+    max-width: calc(100% - 24px);
+    margin: 12px;
+    box-sizing: border-box;
+}
+
+#random-choice-modal .panel {
+    width: min(900px, calc(100% - 24px));
+    min-width: 0;
+    max-width: calc(100% - 24px);
+    margin: 12px;
+    box-sizing: border-box;
+    align-items: center;
+}
+
 /* Random choice cards inside modal */
 .random-choice-card {
     background: rgba(255, 255, 255, 0.06);
@@ -826,6 +1076,14 @@ div#shopping-list {
     align-items: center;
     cursor: pointer;
     border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.random-choice-container {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 8px;
 }
 
 .random-choice-card h3 {
@@ -869,6 +1127,17 @@ div#shopping-list {
     font-size: 1rem;
 }
 
+@media (max-width: 768px) {
+    .random-choice-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .random-or {
+        margin: 0;
+    }
+}
+
 /* Import button throb animation while importing */
 .cta-button.importing {
     animation: throb-blue 1s ease-in-out infinite;
@@ -896,9 +1165,6 @@ div#shopping-list {
 /* Mobile tweaks for the add-recipe modal and form */
 @media (max-width: 480px) {
     #recipe-form .panel {
-        width: calc(100% - 24px);
-        max-width: calc(100% - 24px);
-        margin: 12px;
         padding: 12px;
         border-radius: 12px;
     }

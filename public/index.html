@@ -33,16 +33,16 @@
                 <div class="recipe-list scrollable-list" id="recipe-list"></div>
             </div>
             <div class="panel glass hero" id="plan-panel">
-                    <div id="mealplan-join-ui" style="display:flex;gap:12px;align-items:center;padding:8px;margin-bottom:12px;">
-                        <label id="mealplan-label" for="mealplan-code-input" style="color:#fff;font-weight:600;margin-right:8px;">Plan: (not joined)</label>
-                        <div style="display:flex;gap:8px;align-items:center;">
-                            <input type="text" id="mealplan-code-input" placeholder="Enter mealplan codeword" style="padding:6px;" />
+                    <div id="mealplan-join-ui" class="mealplan-join">
+                        <label id="mealplan-label" for="mealplan-code-input">Plan (not joined)</label>
+                        <div class="mealplan-join-controls">
+                            <input type="text" id="mealplan-code-input" placeholder="Enter mealplan code" />
                             <button id="join-mealplan-btn" class="cta-button"><span>Join</span></button>
                             <button id="leave-mealplan-btn" class="cta-button small-cta" style="display:none;"><span>Leave</span></button>
                         </div>
                     </div>
                     <div class="meal-plan scrollable-list" id="meal-plan"></div>
-                    <div style="margin-top:12px;display:flex;justify-content:center;" id="random-recipe-container">
+                    <div class="random-recipe-container" id="random-recipe-container">
                         <div class="cta-button" id="random-recipe-btn">
                             <span>Random Recipe</span>
                             <img src="./icons/random.png" class="icon-button">
@@ -50,6 +50,10 @@
                     </div>
             </div>
             <div class="panel glass hero" id="shop-panel">
+                <form class="misc-shopping-form" id="misc-shopping-form">
+                    <input type="text" id="misc-item-input" placeholder="Add an item" aria-label="Miscellaneous shopping item">
+                    <button type="submit" class="cta-button small-cta">Add item</button>
+                </form>
                 <div class="shopping-list scrollable-list" id="shopping-list"></div>
             </div>
         </div>
@@ -61,14 +65,13 @@
 
     <div class="modal" id="recipe-form">
         <div class="panel glass hero">
-            <button class="close-modal" aria-label="Close"
-                style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;">&#10005;</button>
-            <form style="display:flex;flex-direction:column;gap:1rem;">
+            <button class="close-modal" id="recipe-modal-close" aria-label="Close">&#10005;</button>
+            <form class="recipe-form-fields">
                 <label for="recipe-name">Name:</label>
                 <input type="text" id="recipe-name" name="recipe-name">
                 <label for="import-url">Import from URL:</label>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="url" id="import-url" name="import-url" placeholder="https://example.com/recipe" style="flex:1;padding:6px;" />
+                <div class="recipe-import-row">
+                    <input type="url" id="import-url" name="import-url" placeholder="https://example.com/recipe" />
                     <button id="import-btn" class="cta-button small-cta" type="button"><span>Import</span></button>
                 </div>
                 <label for="recipe-ingredients">Ingredients:</label>
@@ -84,10 +87,9 @@
 
     <div class="modal" id="random-choice-modal">
         <div class="panel glass hero" style="max-width:900px;padding:20px;position:relative;">
-            <button class="close-modal" id="random-modal-close" aria-label="Close"
-                style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#fff;">&#10005;</button>
+            <button class="close-modal" id="random-modal-close" aria-label="Close">&#10005;</button>
             <h2 style="color:white;margin-bottom:12px;text-align:center;">Choose a recipe</h2>
-            <div id="random-choice-container" style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;padding:8px;">
+            <div id="random-choice-container" class="random-choice-container">
                 <!-- Two random recipe choice cards will be injected here -->
             </div>
         </div>

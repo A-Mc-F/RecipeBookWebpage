@@ -1,9 +1,9 @@
-import { } from "./src/stageSelection.js"
-import { } from "./src/recipeBookRenderer.js"
+import "./src/stageSelection.js"
+import "./src/recipeBookRenderer.js"
 import { renderMealplan } from "./src/mealPlanRenderer.js"
-import { } from "./src/shoppingListRenderer.js"
-import { } from "./src/randButton.js"
-import { } from "./src/recipeForm.js"
+import "./src/shoppingListRenderer.js"
+import "./src/randButton.js"
+import "./src/recipeForm.js"
 import { setMealplanName, leaveMealplan, getMealplanName, setMealplanChangeListener } from "./src/dataHandler.js"
 import { setChangeListener, getState } from "./src/stateMachine.js"
 
@@ -27,7 +27,7 @@ function updateUIForJoin(name) {
         if (mealPlanContainer) mealPlanContainer.style.display = '';
         if (randomRecipeContainer) randomRecipeContainer.style.display = '';
     } else {
-        label.textContent = 'Plan: (not joined)';
+        label.textContent = 'Plan (not joined)';
         input.style.display = '';
         joinBtn.style.display = '';
         leaveBtn.style.display = 'none';
@@ -52,11 +52,6 @@ leaveBtn.addEventListener('click', () => {
 
 window.addEventListener('beforeunload', () => {
     try { leaveMealplan(); } catch (e) { /* ignore */ }
-});
-
-// Optional: re-render when mealplan changes
-setMealplanChangeListener((mp) => {
-    renderMealplan();
 });
 
 // Show join UI only when on the Plan stage

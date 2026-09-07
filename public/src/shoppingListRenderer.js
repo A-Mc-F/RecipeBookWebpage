@@ -1,21 +1,21 @@
 import { getState, setChangeListener } from "./stateMachine.js";
-import { getMealplanData, addMealplanItem, getMealplanItem, getRecipeByID, getShoppingChecks, updateShoppingCheck, setMealplanChangeListener } from "./dataHandler.js";
+import { getMealplanData, getRecipeByID, getShoppingChecks, updateShoppingCheck, getMiscShoppingItems, addMiscShoppingItem, removeMiscShoppingItem, setMealplanChangeListener } from "./dataHandler.js";
 
-let SortMode = "alpha"; // Default sort mode
+let sortMode = "alpha";
 
 let miscItemGroupName = "Miscellaneous";
-let miscItemGroupType = "misc_group"; // Type for the Miscellaneous group
-let miscItemType = "misc";
 
 
 // --- Shopping List Logic ---
-export function renderShoppingList(sortMode = SortMode) {
+export function renderShoppingList(nextSortMode = sortMode) {
     if (getState('stage') !== 'Shop') {
         return
     }
     console.log('rendering Shopping list')
 
-    SortMode = sortMode; // Update global sort mode
+    if (nextSortMode === 'alpha' || nextSortMode === 'recipe') {
+        sortMode = nextSortMode;
+    }
 
     const shoppingListPage = document.getElementById('shopping-list');
     if (!shoppingListPage) return;
@@ -23,6 +23,9 @@ export function renderShoppingList(sortMode = SortMode) {
 
     // Load persisted checkbox state (shared via mealplan when joined)
     const persistedChecks = getShoppingChecks() || {};
+    const miscItems = getMiscShoppingItems().map(item => typeof item === 'string'
+        ? { id: item, text: item }
+        : item);
 
     /** @type {Mealplan} */
     const mealplanData = getMealplanData() || { name: '', type: 'mealplan', items: [] };
@@ -54,9 +57,6 @@ export function renderShoppingList(sortMode = SortMode) {
                         ingredients: recipe.ingredients
                     });
                 }
-            } else if (item.type === miscItemType || item.type === 'other') {
-                // Add misc/other items to the miscIngredients array
-                miscIngredients.push(item.text);
             }
         }
 
@@ -72,6 +72,12 @@ export function renderShoppingList(sortMode = SortMode) {
     }
 
     let recipeIngredientMap = flattenRecipes(isMealplanLoaded ? mealplanData.items : []);
+    if (miscItems.length > 0) {
+        recipeIngredientMap.push({
+            name: miscItemGroupName,
+            ingredients: miscItems
+        });
+    }
 
     // If there are no ingredients, show a clear placeholder and stop.
     // If a plan is still loading, avoid flashing a false empty state by keeping the page blank.
@@ -91,7 +97,7 @@ export function renderShoppingList(sortMode = SortMode) {
 
     // --- Shopping List Rendering ---
 
-    if (SortMode === "recipe") {
+    if (sortMode === "recipe") {
         recipeIngredientMap.forEach(recipe => {
             const heading = document.createElement('h3');
             heading.textContent = recipe.name;
@@ -101,7 +107,9 @@ export function renderShoppingList(sortMode = SortMode) {
             ul.className = 'shopping-list-group';
 
             recipe.ingredients.forEach(ingredient => {
-                const li = createIngredientListItem(ingredient, persistedChecks);
+                const li = recipe.name === miscItemGroupName
+                    ? createMiscListItem(ingredient, persistedChecks)
+                    : createIngredientListItem(ingredient, persistedChecks);
                 ul.appendChild(li);
             });
 
@@ -119,14 +127,17 @@ export function renderShoppingList(sortMode = SortMode) {
         });
 
         allIngredients.sort((a, b) => {
-            const ingA = a.ingredient || "";
-            const ingB = b.ingredient || "";
+            const ingA = typeof a.ingredient === 'string' ? a.ingredient : a.ingredient.text;
+            const ingB = typeof b.ingredient === 'string' ? b.ingredient : b.ingredient.text;
             return ingA.localeCompare(ingB);
         });
 
         allIngredients.forEach(item => {
-            const text = `${item.ingredient} <span style="color:gray;font-size:0.9em;">(${item.recipe})</span>`;
-            const li = createIngredientListItem(text, persistedChecks, /*isHtml=*/true);
+            const ingredientText = typeof item.ingredient === 'string' ? item.ingredient : item.ingredient.text;
+            const text = `${ingredientText} <span style="color:gray;font-size:0.9em;">(${item.recipe})</span>`;
+            const li = item.recipe === miscItemGroupName
+                ? createMiscListItem(item.ingredient, persistedChecks)
+                : createIngredientListItem(text, persistedChecks, /*isHtml=*/true);
             shoppingListPage.appendChild(li);
         });
     }
@@ -135,59 +146,16 @@ export function renderShoppingList(sortMode = SortMode) {
     addCopyButton(shoppingListPage);
 }
 
-window.addMiscShoppingItem = function () {
+function handleMiscShoppingSubmit() {
     const input = document.getElementById('misc-item-input');
+    if (!input) return;
     const value = input.value.trim();
     if (!value) return;
-
-    // Add to mealplanData as an "Other" object in the Miscellaneous meal group
-    let searchResult = getMealplanItem(miscItemGroupType, miscItemGroupName);
-    let miscContainerItem = searchResult.item
-
-    if (!miscContainerItem) {
-        let miscMealGroup = { type: miscItemGroupType, name: miscItemGroupName, items: [{ type: miscItemType, text: value }] };
-        addMealplanItem([], miscMealGroup);
-    }
-    else {
-        addMealplanItem(miscContainerItem, { type: miscItemType, text: value });
-    }
-    input.value = ''; // Clear input field
+    addMiscShoppingItem(value);
+    input.value = '';
     renderShoppingList();
 }
 
-
-// Strikethrough per ingredient (per recipe group)
-function toggleStrikethrough(element) {
-    let decoration = 'line-through'
-    if (element.style.textDecoration === decoration) {
-        element.style.textDecoration = 'none';
-        element.style.color = 'none';
-        element.parentElement.insertBefore(element, element.parentElement.firstChild);
-    } else {
-        element.style.textDecoration = decoration;
-        element.style.color = 'silver';
-        element.parentElement.appendChild(element);
-    }
-}
-
-
-// Persisted checkbox state helpers
-function loadChecks() {
-    try {
-        const raw = localStorage.getItem('shoppingChecks');
-        return raw ? JSON.parse(raw) : {};
-    } catch (e) {
-        return {};
-    }
-}
-
-function saveChecks(map) {
-    try {
-        localStorage.setItem('shoppingChecks', JSON.stringify(map));
-    } catch (e) {
-        // ignore
-    }
-}
 
 function createIngredientListItem(text, persistedChecks, isHtml = false) {
     const li = document.createElement('li');
@@ -219,6 +187,21 @@ function createIngredientListItem(text, persistedChecks, isHtml = false) {
     });
 
     li.appendChild(label);
+    return li;
+}
+
+function createMiscListItem(item, persistedChecks) {
+    const li = createIngredientListItem(item.text, persistedChecks);
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.className = 'remove-shopping-item';
+    removeButton.textContent = 'Remove';
+    removeButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        removeMiscShoppingItem(item.id);
+    });
+    li.appendChild(removeButton);
     return li;
 }
 
@@ -281,7 +264,15 @@ async function copyToClipboardPlain() {
 
 setChangeListener('stage', renderShoppingList)
 
+const miscShoppingForm = document.getElementById('misc-shopping-form');
+if (miscShoppingForm) {
+    miscShoppingForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        handleMiscShoppingSubmit();
+    });
+}
+
 // Re-render shopping list when the shared mealplan or checks change
-setMealplanChangeListener(renderShoppingList)
+setMealplanChangeListener(() => renderShoppingList())
 
 renderShoppingList()

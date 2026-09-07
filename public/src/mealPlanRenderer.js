@@ -33,7 +33,7 @@ function renderMealplanContainer(object) {
             {
                 // Top-level mealplan name is shown in the Join/Leave UI only.
                 // Do not render the mealplan heading here to avoid duplicate titles.
-                if (object.items && !(object.items.length === 0)) {
+                if (Array.isArray(object.items) && object.items.length > 0) {
                     object.items.forEach((item) => {
                         el.appendChild(renderMealplanContainer(item));
                     })
@@ -51,7 +51,7 @@ function renderMealplanContainer(object) {
 
                 el.appendChild(headingRow);
 
-                if (object.items || !(object.items.length === 0)) {
+                if (Array.isArray(object.items) && object.items.length > 0) {
                     object.items.forEach((item) => {
                         el.appendChild(renderMealplanContainer(item));
                     })
@@ -80,7 +80,7 @@ function renderMealplanContainer(object) {
                 // headingRow.appendChild(removeButton(object));
                 el.appendChild(headingRow);
 
-                if (object.items || !(object.items.length === 0)) {
+                if (Array.isArray(object.items) && object.items.length > 0) {
                     object.items.forEach((item) => {
                         el.appendChild(renderMealplanContainer(item));
                     })
@@ -113,7 +113,7 @@ function renderMealplanContainer(object) {
                 el.appendChild(headingRow);
 
                 // Children
-                if (object.items || !(object.items.length === 0)) {
+                if (Array.isArray(object.items) && object.items.length > 0) {
                     object.items.forEach((item) => {
                         el.appendChild(renderMealplanContainer(item));
                     })
