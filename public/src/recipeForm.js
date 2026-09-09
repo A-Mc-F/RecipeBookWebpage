@@ -28,16 +28,19 @@ function clearRecipeFormFields() {
 }
 
 async function fetchHtmlThroughProxy(url) {
-    // Try AllOrigins first, then fallback to jina.ai text proxy
+    // Jina's HTML mode preserves the recipe card and is CORS-readable.
     const proxies = [
+        {
+            url: (u) => `https://r.jina.ai/http://${u.replace(/^https?:\/\//, '')}`,
+            options: { headers: { 'x-respond-with': 'html' } }
+        },
         (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-        (u) => `https://r.jina.ai/http://${u.replace(/^https?:\/\//, '')}`
     ];
     let lastErr = null;
     for (const p of proxies) {
         try {
-            const urlToFetch = p(url);
-            const resp = await fetch(urlToFetch);
+            const proxy = typeof p === 'function' ? { url: p(url) } : { ...p, url: p.url(url) };
+            const resp = await fetch(proxy.url, proxy.options);
             if (!resp.ok) throw new Error('Failed to fetch URL via proxy: ' + resp.status);
             const text = await resp.text();
             if (text && text.length > 0) return text;
@@ -47,6 +50,13 @@ async function fetchHtmlThroughProxy(url) {
         }
     }
     throw lastErr || new Error('All proxies failed');
+}
+
+function getRecipePrintUrl(url) {
+    const parsedUrl = new URL(url);
+    const slug = parsedUrl.pathname.replace(/^\/+|\/+$/g, '');
+    if (!slug || slug.startsWith('wprm_print/')) return url;
+    return `${parsedUrl.origin}/wprm_print/${slug}`;
 }
 
 function findRecipeObject(value) {
@@ -60,7 +70,8 @@ function findRecipeObject(value) {
         return null;
     }
 
-    if (value['@type'] === 'Recipe') {
+    const types = Array.isArray(value['@type']) ? value['@type'] : [value['@type']];
+    if (types.includes('Recipe')) {
         return value;
     }
 
@@ -83,18 +94,10 @@ function normalizeIngredient(item) {
     if (!clean) return '';
 
     clean = clean.replace(/^(?:-\s*|\*\s*|•\s*)/g, '');
-    clean = clean.replace(/\s*[,;]\s*(?=(?:\d|[A-Za-z]))/g, ', ');
-    clean = clean.replace(/\s*\(.*?\)\s*/g, ' ').trim();
-
-    if (clean.length > 80) clean = clean.slice(0, 80).trim();
-
-    // Split obvious multi-ingredient strings like "1 onion, 2 carrots, 1 tsp salt" into separate entries.
-    const splitCandidates = clean.split(/\s*,\s*(?=(?:\d+\s+|\d+\.?\d*\s*|[A-Za-z]))/);
-    const parts = splitCandidates
-        .map(part => part.replace(/\s+/g, ' ').trim())
-        .filter(part => part && part.length > 1);
-
-    return parts.length > 1 ? parts : [clean].filter(Boolean);
+    clean = clean.replace(/\s*\([^)]*\)/g, '');
+    clean = clean.replace(/\s*,\s*(?:cut|chopped|sliced|diced|minced|trimmed|peeled|cored|deseeded|separated|softened|melted|divided|to serve|for serving|optional)\b.*$/i, '');
+    clean = clean.replace(/\s*,\s*(?:or|plus)\s+(?:any|other|regular|low|high|fresh|frozen)\b.*$/i, '');
+    return [clean.replace(/\s+/g, ' ').replace(/\s+,/g, ',').trim()].filter(Boolean);
 }
 
 function normalizeInstructions(value) {
@@ -107,6 +110,9 @@ function normalizeInstructions(value) {
                 if (item && typeof item === 'object') {
                     if (typeof item.text === 'string') return item.text.trim();
                     if (typeof item.name === 'string') return item.name.trim();
+                    if (Array.isArray(item.itemListElement)) {
+                        return normalizeInstructions(item.itemListElement).join(' ');
+                    }
                 }
                 return '';
             })
@@ -144,10 +150,27 @@ function parseRecipeFromHtml(htmlText) {
 
             if (!name && ingredientList.length === 0 && instructions.length === 0) continue;
 
-            return { name, ingredients: ingredientList, instructions };
+            return {
+                name,
+                ingredients: ingredientList,
+                instructions
+            };
         } catch (e) {
             // Ignore malformed JSON-LD blocks and continue to the next script.
         }
+    }
+
+    const name = doc.querySelector('.wprm-recipe-name')?.textContent.trim() ||
+        doc.querySelector('title')?.textContent.replace(/\s+-\s+RecipeTin Eats.*$/i, '').trim() || '';
+    const ingredients = Array.from(doc.querySelectorAll('.wprm-recipe-ingredient'))
+        .map((item) => normalizeIngredient(item.textContent))
+        .flat();
+    const instructions = Array.from(doc.querySelectorAll('.wprm-recipe-instruction'))
+        .map((item) => item.textContent.replace(/\s+/g, ' ').trim())
+        .filter(Boolean);
+
+    if (name && ingredients.length > 0 && instructions.length > 0) {
+        return { name, ingredients, instructions };
     }
 
     return null;
@@ -156,8 +179,16 @@ function parseRecipeFromHtml(htmlText) {
 async function importRecipeFromUrl(url) {
     try {
         if (!url) throw new Error('No URL provided');
-        const html = await fetchHtmlThroughProxy(url);
-        const parsed = parseRecipeFromHtml(html);
+        let html;
+        let parsed;
+        try {
+            html = await fetchHtmlThroughProxy(getRecipePrintUrl(url));
+            parsed = parseRecipeFromHtml(html);
+            if (!parsed) throw new Error('Print recipe data not found');
+        } catch (printError) {
+            html = await fetchHtmlThroughProxy(url);
+            parsed = parseRecipeFromHtml(html);
+        }
         if (!parsed) throw new Error('No recipe data found on that page');
         // Populate form for user review
         document.getElementById('recipe-name').value = parsed.name || '';
@@ -213,8 +244,7 @@ async function submitRecipeForm() {
     const recipe = {
         "name": name,
         "ingredients": ingredients,
-        "instructions": instructions
-        // Add more fields if needed
+        "instructions": instructions,
     };
 
     try {
